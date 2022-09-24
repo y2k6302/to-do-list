@@ -135,7 +135,7 @@ describe('ToDoListComponent', () => {
       it(`should toDoTasks equals 'getToDoTasks()' result when 'onSelectTabChange(0)' being called`, async () => {
         const tasks: Tasks = { tasks: [testTask1, testTask2] }
         component.toDoTasks = []
-        toDoServiceSpy.getToDoTasks.and.returnValue(TE.of(tasks))
+        toDoServiceSpy.getTasks.and.returnValue(TE.of(tasks))
         await component.onSelectTabChange({ index: 0 })
 
         expect(component.toDoTasks).toEqual(tasks.tasks)
@@ -153,7 +153,7 @@ describe('ToDoListComponent', () => {
 
     describe('API Failed', () => {
       it(`should get error when toDoService.getToDoTasks() failed`, async () => {
-        toDoServiceSpy.getToDoTasks.and.returnValue(TE.left(new Error('Get to-do tasks failed.')))
+        toDoServiceSpy.getTasks.and.returnValue(TE.left(new Error('Get to-do tasks failed.')))
 
         await component.getToDoTasks()
 

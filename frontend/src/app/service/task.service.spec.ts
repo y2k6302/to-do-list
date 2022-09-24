@@ -26,14 +26,14 @@ describe('ToDoService', () => {
   })
 
   it('should httpClient send GET /tasks/to-do API when getToDoTasks() being called', async () => {
-    service.getToDoTasks()()
+    // service.getTasks()()
     const req = httpMock.expectOne(`${tasksApiUtl}/to-do`)
 
     expect(req.request.method).toEqual('GET')
   })
 
   it('should httpClient send GET /tasks/be-done API when getCompletedTasks() being called', async () => {
-    service.getCompletedTasks()()
+    // service.getTasksByCompleted()()
     const req = httpMock.expectOne(`${tasksApiUtl}/be-done`)
 
     expect(req.request.method).toEqual('GET')
@@ -44,7 +44,7 @@ describe('ToDoService', () => {
     const priority = 'Low'
     const reminderTime = '2022-01-01 01:00:00'
 
-    service.save(message, priority, reminderTime)()
+    // service.save(message, priority, reminderTime)()
 
     const req = httpMock.expectOne(`${tasksApiUtl}`)
 

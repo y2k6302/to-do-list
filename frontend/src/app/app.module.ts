@@ -20,6 +20,7 @@ import { DropdownModule } from 'primeng/dropdown'
 import { ImageModule } from 'primeng/image'
 import { CheckboxModule } from 'primeng/checkbox';
 import { DividerModule } from 'primeng/divider';
+import { CardModule } from 'primeng/card';
 
 
 @NgModule({
@@ -43,6 +44,7 @@ import { DividerModule } from 'primeng/divider';
     ImageModule,
     CheckboxModule,
     DividerModule,
+    CardModule,
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: environment.production,
       registrationStrategy: 'registerWhenStable:30000'

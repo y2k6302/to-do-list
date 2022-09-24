@@ -52,12 +52,23 @@
           </span>
       </div>
     </div>
-
-
     -->
-
-
-
+    
+<div>
+    <p-card *ngFor="let task of toDoTasks;" [header]="task.message" subheader="Card Subheader" [style]="{width: '360px', margin: '10px', float: 'left', backgroundColor:getBackGroupColer(task.priority)}" styleClass="p-card-shadow">
+      <ng-template pTemplate="footer">
+        <button pButton type="button" label="Done" icon="pi pi-check"
+        class="p-button-success p-button-sm" (click)="done(task.id)"
+        style="margin: 5px;"></button>
+        <button pButton type="button" label="Edit" icon="pi pi-pencil"
+          class="p-button-warning p-button-sm" (click)="editDialog(task)"
+          style="margin: 5px;"></button>
+        <button pButton type="button" label="Delete" icon="pi pi-trash"
+          class="p-button-danger p-button-sm" (click)="delete(task.id)"
+          style="margin: 5px;"></button>
+      </ng-template>
+    </p-card>
+  </div>
 
 
 
@@ -107,16 +118,16 @@
 
 <p-dialog [header]="action" [(visible)]="displayDialog" [modal]="true" [style]="{width: '50vw'}" [contentStyle]="{'overflow': 'visible'}">
   <div style="padding-bottom:10px;">
-    <h4 style="width: 10%;float:left;margin: 10px;">message</h4>
+    <h4 style="width: 10%;float:left;margin: 10px;">Message</h4>
     <input id="addInput" type="text" style="width: 70%;" pInputText [(ngModel)]="inputMessage">
   </div>
   <div style="padding-bottom:10px;">
-    <h4 style="width: 10%;float:left;margin: 10px;padding-right:10px;">priority</h4>
+    <h4 style="width: 10%;float:left;margin: 10px;padding-right:10px;">Priority</h4>
     <p-dropdown [options]="priorities" [(ngModel)]="inputPriority"></p-dropdown>
   </div>
   <div>
-    <h4 style="width: 10%;float:left;margin: 10px;padding-right:10px;">reminder</h4>
-    <p-calendar [(ngModel)]="inputReminderTime" [showTime]="true" inputId="time" [showButtonBar]="true">
+    <h4 style="width: 10%;float:left;margin: 10px;padding-right:10px;">Reminder</h4>
+    <p-calendar [(ngModel)]="inputReminderTime" dateFormat="yy-mm-dd" [showTime]="true" inputId="time" [showButtonBar]="true">
     </p-calendar>
     <a style="color:red;padding-left:10px;">{{ validationFailedMessage }}</a>
   </div>

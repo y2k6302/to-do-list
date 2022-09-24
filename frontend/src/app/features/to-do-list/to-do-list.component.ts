@@ -57,17 +57,14 @@ export class ToDoListComponent implements OnInit {
 
   async getToDoTasks() {
     await pipe(
-      this.toDoService.getToDoTasks(),
+      this.toDoService.getTasksByCompleted(''),
       TE.match(
         error => {
           this.displayErrorDialog = true
           this.serverErrorMessage = error.message
         },
         tasks => {
-          // let a: Tasks = tasks;
-          let b =  tasks;
           this.toDoTasks = tasks
-          //this.toDoTasks = tasks.tasks
           this.sortTasks()
         }
       )
@@ -113,7 +110,7 @@ export class ToDoListComponent implements OnInit {
 
   async getCompletedTasks() {
     await pipe(
-      this.toDoService.getCompletedTasks(),
+      this.toDoService.getTasksByCompleted('true'),
       TE.match(
         error => {
           this.displayErrorDialog = true
@@ -145,8 +142,13 @@ export class ToDoListComponent implements OnInit {
 
   async add() {
     if (this.validation()) {
+      this.selectTask.message = this.inputMessage
+      this.selectTask.priority = this.inputPriority
+      this.selectTask.reminderTime = this.inputReminderTime?.toISOString()
+
       await pipe(
-        this.toDoService.save(this.inputMessage, this.inputPriority, this.dateToString(this.inputReminderTime)),
+        //this.toDoService.save(this.inputMessage, this.inputPriority, this.dateToString(this.inputReminderTime)),
+        this.toDoService.save(this.selectTask),
         TE.match(
           error => {
             this.displayErrorDialog = true
@@ -187,7 +189,7 @@ export class ToDoListComponent implements OnInit {
     if (this.validation()) {
       this.selectTask.message = this.inputMessage
       this.selectTask.priority = this.inputPriority
-      this.selectTask.reminderTime = this.dateToString(this.inputReminderTime)
+      this.selectTask.reminderTime = this.inputReminderTime?.toISOString()
 
       await pipe(
         this.toDoService.update(this.selectTask),
@@ -199,7 +201,7 @@ export class ToDoListComponent implements OnInit {
           task => {
             const updateTask = task
             this.rebuildNotification(updateTask)
-            this.sortTasks()
+            this.getToDoTasks();
             this.hideDialog();
           }
         )
@@ -356,6 +358,16 @@ export class ToDoListComponent implements OnInit {
 
   hideDialog() {
     this.displayDialog = false;
+  }
+
+  getBackGroupColer(proiory: string):string {
+    if(proiory === "High") {
+      return '#f2b9b96b'
+    } else if (proiory === "Medium") {
+      return 'rgba(186, 169, 14, 0.25)'
+    } else {
+      return 'rgba(75, 205, 49, 0.35)'
+    }
   }
 
 }

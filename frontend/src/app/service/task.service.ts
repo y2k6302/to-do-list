@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpRequest } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { lastValueFrom } from 'rxjs';
 import { Tasks, Task } from 'src/app/types/tasks';
@@ -10,49 +10,28 @@ import * as TE from 'fp-ts/TaskEither'
 })
 export class ToDoService {
 
-  private tasksApiUtl = `${environment.toDoListBackendUrl}/tasks`
+  private tasksApiUtl = `${environment.toDoListBackendUrl}/v1/tasks`
 
   constructor(private http: HttpClient) { }
-
-  getToDoTasks2() {
-
-    this.http.get<Tasks>(`${this.tasksApiUtl}/to-do`).subscribe(it => {
-      console.log("ree");
-      console.log(it);
-    })
-  }
-  getToDoTasks() {
+  
+  getTasksByCompleted(completed: string) {
+    const params = new HttpParams().set('completed', completed)
     return TE.tryCatch(
-      () => lastValueFrom(this.http.get<Task[]>(`${this.tasksApiUtl}/to-do`)),
+      () => lastValueFrom(this.http.get<Task[]>(`${this.tasksApiUtl}`, {params: params})),
       (error: any) => new Error(`Get to-do tasks failed. ${error.message}`)
     )
   }
 
-  getCompletedTasks() {
+  save(task: Task) {
     return TE.tryCatch(
-      () => lastValueFrom(this.http.get<Task[]>(`${this.tasksApiUtl}/be-done`)),
-      (error: any) => new Error(`Get Completed tasks failed. ${error.message}`)
-    )
-  }
-
-  save2(task: Task) {
-    console.log('come');
-    return TE.tryCatch(
-      () => lastValueFrom(this.http.post<{ task: Task }>(`${this.tasksApiUtl}`, { task: task})),
-      (error: any) => new Error(`Save task failed. ${error.message}`)
-    )
-  }
-
-  save(message: string, priority: string, reminderTime?: string) {
-    return TE.tryCatch(
-      () => lastValueFrom(this.http.post<Task>(`${this.tasksApiUtl}`, {message: message, priority: priority, reminderTime: reminderTime })),
+      () => lastValueFrom(this.http.post<Task>(`${this.tasksApiUtl}`, task)),
       (error: any) => new Error(`Save task failed. ${error.message}`)
     )
   }
 
   completed(id: string) {
     return TE.tryCatch(
-      () => lastValueFrom(this.http.put<Task>(`${this.tasksApiUtl}/${id}/be-done`, {})),
+      () => lastValueFrom(this.http.put<Task>(`${this.tasksApiUtl}/${id}/completed`, {})),
       (error: any) => new Error(`Completed task failed. ${error.message}`)
     )
   }
