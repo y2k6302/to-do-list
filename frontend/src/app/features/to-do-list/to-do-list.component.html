@@ -1,122 +1,58 @@
-<p-tabView styleClass="tabview-custom" (onChange)="onSelectTabChange($event)">
+<p-tabView styleClass="tabview-custom">
   <p-tabPanel>
     <ng-template pTemplate="header">
       <i class="pi pi-book"></i>
-      <span>&nbsp;To Do</span>
+      <span>&nbsp;To Do List</span>
     </ng-template>
-    
-
-    <!--eeeeeeeee 
-    <div>
-      <input class="col-8" type="text" [(ngModel)]="selectTask.message" pInputText placeholder="to-do-list">
-      <div class="p-dropdowngroup">
-          <p-dropdown [options]="priorities" [(ngModel)]="selectTask.priority"></p-dropdown>
-          <button (click)="addTask()" type="button" pButton pRipple icon="pi pi-plus"></button>      
-      </div>
-    </div>
-
-    <div class="formgroup-inline">
-      <div class="field">
-          <label for="firstname5" class="p-sr-only">Firstname</label>
-          <input id="firstname5" type="text" class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary" placeholder="Firstname">
-      </div>
-      <div class="field">
-          <label for="lastname5" class="p-sr-only">Lastname</label>
-          <input id="lastname5" type="text" class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary" placeholder="Lastname">
-      </div>
-      <button type="button" class="text-white bg-primary-500 border-primary-500 px-3 py-2 text-base border-1 border-solid border-round cursor-pointer transition-all transition-duration-200 hover:bg-primary-600 hover:border-primary-600 active:bg-primary-700 active:border-primary-700">Submit</button>
-  </div>
-
-    <p-divider></p-divider>
-
-    <div class="col-6">
-      <div class="p-inputgroup">
-          <span class="p-inputgroup-addon"><p-checkbox name="taskName" value="val1" [(ngModel)]="selectedTasks"></p-checkbox></span>
-          <input type="text" pInputText placeholder="Website" style="text-decoration: line-through;">      
-          <span class="p-inputgroup-addon">
-            <button pButton type="button" icon="pi pi-times" 
-            class="p-button-rounded p-button-danger p-button-text"
-            style="height: 20px; width:20px"></button>
-          </span>
-      </div>
-    </div>
-
-    <div class="col-6">
-      <div class="p-inputgroup">
-          <span class="p-inputgroup-addon"><p-checkbox name="taskName" value="val1" [(ngModel)]="selectedTasks"></p-checkbox></span>
-          <input disabled type="text" pInputText placeholder="Website" style="text-decoration: line-through;">      
-          <span class="p-inputgroup-addon">
-            <button pButton type="button" icon="pi pi-times" 
-            class="p-button-rounded p-button-danger p-button-text"
-            style="height: 20px; width:20px"></button>
-          </span>
-      </div>
-    </div>
-    -->
-    
-<div>
-    <p-card *ngFor="let task of toDoTasks;" [header]="task.message" subheader="Card Subheader" [style]="{width: '360px', margin: '10px', float: 'left', backgroundColor:getBackGroupColer(task.priority)}" styleClass="p-card-shadow">
-      <ng-template pTemplate="footer">
-        <button pButton type="button" label="Done" icon="pi pi-check"
-        class="p-button-success p-button-sm" (click)="done(task.id)"
-        style="margin: 5px;"></button>
-        <button pButton type="button" label="Edit" icon="pi pi-pencil"
-          class="p-button-warning p-button-sm" (click)="editDialog(task)"
-          style="margin: 5px;"></button>
-        <button pButton type="button" label="Delete" icon="pi pi-trash"
-          class="p-button-danger p-button-sm" (click)="delete(task.id)"
-          style="margin: 5px;"></button>
-      </ng-template>
-    </p-card>
-  </div>
-
-
 
     <div style="padding: 5px">
-      <button id="addButton" pButton type="button" label="Add" icon="pi pi-plus" class="p-button-sm" (click)="addDialoag()" style="margin: 5px;"></button>
+      <button id="addButton" pButton type="button" label="Add" icon="pi pi-plus" class="p-button-sm"
+        (click)="addDialoag()" style="margin: 5px;"></button>
     </div>
-    <p-orderList [value]="toDoTasks" [listStyle]="{'max-height':'30rem'}" filterBy="message">
-      <ng-template let-task pTemplate="item">
-        <div>
-          <a style="float:left;display: inline-flex; align-items: center;">
-            <p-image src="assets/images/priority/{{task.priority}}.png" width="30"></p-image>
-            <h3 style="padding-left:10px;">{{task.message}}</h3>
-          </a>
-          <a style="float:right;display: inline-flex; align-items: center;">
-            <p-image *ngIf="isExpired(task.reminderTime)" src="assets/images/expired.png" width="60"></p-image>
-            <h3 style="padding-left:10px;">{{task.reminderTime | date : 'yyyy-MM-dd HH:mm'}}</h3>
-            <button pButton type="button" label="Done" icon="pi pi-check"
-              class="p-button-success p-button-sm" (click)="done(task.id)"
-              style="margin: 5px;"></button>
-            <button pButton type="button" label="Edit" icon="pi pi-pencil"
-              class="p-button-warning p-button-sm" (click)="editDialog(task)"
-              style="margin: 5px;"></button>
-            <button pButton type="button" label="Delete" icon="pi pi-trash"
-              class="p-button-danger p-button-sm" (click)="delete(task.id)"
-              style="margin: 5px;"></button>
-          </a>
-        </div>
-      </ng-template>
-    </p-orderList>
-  </p-tabPanel>
-  <p-tabPanel header="Header II">
-    <ng-template pTemplate="header">
-      <i class="pi pi-check-square"></i>
-      <span>&nbsp;Completed</span>
-    </ng-template>
-    <p-orderList [value]="completedTasks" [listStyle]="{'max-height':'30rem'}" filterBy="message">
-      <ng-template let-task pTemplate="item">
-        <div>
-          <div class="product-list-detail">
-            <h3 style="float:left">{{task.message}}</h3>
-          </div>
-        </div>
-      </ng-template>
-    </p-orderList>
+
+    <div>
+      <p-card *ngFor="let task of toDoTasks;"
+        [style]="{width: '360px', margin: '10px',float: 'left', backgroundColor:getBackGroupColer(task.priority, task.completed)}"
+        styleClass="p-card-shadow">
+        
+        <ng-template pTemplate="title">
+          <p style="word-break: break-all;" [style.textDecoration]="task.completed === 'Y' ? 'line-through' : ''">{{ task.message }}</p>
+        </ng-template>
+        
+        <ng-template pTemplate="content">
+          <p *ngIf="task.reminderTime">{{ task.reminderTime | date : 'yyyy-MM-dd HH:mm'}} 
+            <p-image *ngIf="task.completed === 'N' && isExpired(task.reminderTime)" src="assets/images/expired.png" width="100"></p-image>
+          </p>
+        </ng-template>
+
+        <ng-component *ngIf="task.completed === 'Y' then completed else notComplete"></ng-component>
+
+        <ng-template #notComplete>
+          <ng-template pTemplate="footer">
+            <button pButton type="button" label="Done" icon="pi pi-check" class="p-button-success p-button-sm"
+              (click)="done(task.id)" style="margin: 5px;"></button>
+            <button pButton type="button" label="Edit" icon="pi pi-pencil" class="p-button-warning p-button-sm"
+              (click)="editDialog(task)" style="margin: 5px;"></button>
+            <button pButton type="button" label="Delete" icon="pi pi-trash" class="p-button-danger p-button-sm"
+              (click)="delete(task.id)" style="margin: 5px;"></button>
+          </ng-template>
+        </ng-template>
+
+        <ng-template #completed>
+          <ng-template pTemplate="footer">
+            <button pButton type="button" label="Redo" icon="pi pi-undo" class="p-button-success p-button-sm"
+              (click)="redo(task.id)" style="margin: 5px;"></button>
+          </ng-template>
+        </ng-template>
+
+      </p-card>
+    </div>
+
   </p-tabPanel>
 </p-tabView>
 
-<p-dialog [header]="action" [(visible)]="displayDialog" [modal]="true" [style]="{width: '50vw'}" [contentStyle]="{'overflow': 'visible'}">
+<p-dialog [header]="action" [(visible)]="displayDialog" [modal]="true" [style]="{width: '50vw'}"
+  [contentStyle]="{'overflow': 'visible'}">
   <div style="padding-bottom:10px;">
     <h4 style="width: 10%;float:left;margin: 10px;">Message</h4>
     <input id="addInput" type="text" style="width: 70%;" pInputText [(ngModel)]="inputMessage">
@@ -127,42 +63,16 @@
   </div>
   <div>
     <h4 style="width: 10%;float:left;margin: 10px;padding-right:10px;">Reminder</h4>
-    <p-calendar [(ngModel)]="inputReminderTime" dateFormat="yy-mm-dd" [showTime]="true" inputId="time" [showButtonBar]="true">
+    <p-calendar [(ngModel)]="inputReminderTime" dateFormat="yy-mm-dd" [showTime]="true" inputId="time"
+      [showButtonBar]="true">
     </p-calendar>
     <a style="color:red;padding-left:10px;">{{ validationFailedMessage }}</a>
   </div>
   <ng-template pTemplate="footer">
-    <button id="saveButton" pButton type="button" label="Save" icon="pi pi-save"
-      [disabled]="inputMessage.trim() === ''" class="p-button-sm"
-      (click)="action === ADD ? add() : edit()"></button>
+    <button id="saveButton" pButton type="button" label="Save" icon="pi pi-save" [disabled]="inputMessage.trim() === ''"
+      class="p-button-sm" (click)="action === ADD ? add() : edit()"></button>
   </ng-template>
 </p-dialog>
-
-<!--
-
-<p-dialog header="Edit" p-dialog-titlebar-icon [(visible)]="displayEditDialog" [modal]="true" [style]="{width: '50vw'}"
-  [draggable]="false" [resizable]="false" [contentStyle]="{'overflow': 'visible'}">
-  <div style="padding-bottom:10px;">
-    <h4 style="width: 10%;float:left;margin: 10px;">message</h4>
-    <input id="addInput" type="text" style="width: 70%;" pInputText [(ngModel)]="inputMessage">
-  </div>
-  <div style="padding-bottom:10px;">
-    <h4 style="width: 10%;float:left;margin: 10px;padding-right:10px;">priority</h4>
-    <p-dropdown [options]="priorities" [(ngModel)]="inputPriority"></p-dropdown>
-  </div>
-  <div>
-    <h4 style="width: 10%;float:left;margin: 10px;padding-right:10px;">reminder</h4>
-    <p-calendar [(ngModel)]="inputReminderTime" [showTime]="true" inputId="time" [showButtonBar]="true">
-    </p-calendar>
-    <a style="color:red;padding-left:10px;">{{ validationFailedMessage }}</a>
-  </div>
-  <ng-template pTemplate="footer">
-    <button id="editSaveButton" pButton type="button" label="Save" icon="pi pi-save"
-      [disabled]="inputMessage.trim() === ''" class="p-button-sm" (click)="edit()"></button>
-  </ng-template>
-</p-dialog>
-
--->
 
 <p-dialog header="Error" p-dialog-titlebar-icon [(visible)]="displayErrorDialog" [modal]="true"
   [style]="{width: '50vw'}" [draggable]="false" [resizable]="false">

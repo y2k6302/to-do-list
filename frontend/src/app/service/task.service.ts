@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams, HttpRequest } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { lastValueFrom } from 'rxjs';
-import { Tasks, Task } from 'src/app/types/tasks';
+import { Task } from 'src/app/types/tasks';
 import { environment } from 'src/environments/environment';
 import * as TE from 'fp-ts/TaskEither'
 
@@ -13,12 +13,11 @@ export class ToDoService {
   private tasksApiUtl = `${environment.toDoListBackendUrl}/v1/tasks`
 
   constructor(private http: HttpClient) { }
-  
-  getTasksByCompleted(completed: string) {
-    const params = new HttpParams().set('completed', completed)
+
+  getTasks() {
     return TE.tryCatch(
-      () => lastValueFrom(this.http.get<Task[]>(`${this.tasksApiUtl}`, {params: params})),
-      (error: any) => new Error(`Get to-do tasks failed. ${error.message}`)
+      () => lastValueFrom(this.http.get<Task[]>(`${this.tasksApiUtl}`)),
+      (error: any) => new Error(`Get tasks failed. ${error.message}`)
     )
   }
 
@@ -29,9 +28,16 @@ export class ToDoService {
     )
   }
 
-  completed(id: string) {
+  complete(id: string) {
     return TE.tryCatch(
-      () => lastValueFrom(this.http.put<Task>(`${this.tasksApiUtl}/${id}/completed`, {})),
+      () => lastValueFrom(this.http.put<Task>(`${this.tasksApiUtl}/${id}/complete`, {})),
+      (error: any) => new Error(`Completed task failed. ${error.message}`)
+    )
+  }
+
+  redo(id: string) {
+    return TE.tryCatch(
+      () => lastValueFrom(this.http.put<Task>(`${this.tasksApiUtl}/${id}/redo`, {})),
       (error: any) => new Error(`Completed task failed. ${error.message}`)
     )
   }

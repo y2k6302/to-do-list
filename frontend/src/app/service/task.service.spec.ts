@@ -70,7 +70,7 @@ describe('ToDoService', () => {
   })
 
   it('should httpClient send PUT /tasks/:id/be-done API when completed() being called', async () => {
-    service.completed(testTask.id)()
+    service.complete(testTask.id)()
 
     const req = httpMock.expectOne(`${tasksApiUtl}/${testTask.id}/be-done`)
 
