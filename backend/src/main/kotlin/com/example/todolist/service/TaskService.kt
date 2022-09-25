@@ -6,7 +6,7 @@ import com.example.todolist.model.TaskError
 import com.example.todolist.repository.TaskRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.util.*
+import kotlin.NoSuchElementException
 
 @Service
 class TaskService {
@@ -25,11 +25,15 @@ class TaskService {
         }
     }
 
-    fun getTaskById(id: String): Either<TaskError.DatabaseError, Optional<Task>> {
+    fun getTaskById(id: String): Either<TaskError, Task> {
         return Either.catch {
-            taskRepository.findById(id)
+            taskRepository.findById(id).get()
         }.mapLeft {
-            TaskError.DatabaseError(it)
+            if (it is NoSuchElementException) {
+                TaskError.NoSuchElementError(it)
+            } else {
+                TaskError.DatabaseError(it)
+            }
         }
     }
 
@@ -43,37 +47,47 @@ class TaskService {
         }
     }
 
-    fun completeTask(id: String): Either<TaskError.DatabaseError, Task> {
+    fun completeTask(id: String): Either<TaskError, Task> {
         return Either.catch {
-            val findById = taskRepository.findById(id)
-            val task = findById.get()
+            val task = taskRepository.findById(id).get()
             task.completed = "Y"
             taskRepository.save(task)
         }.mapLeft {
-            TaskError.DatabaseError(it)
+            if (it is NoSuchElementException) {
+                TaskError.NoSuchElementError(it)
+            } else {
+                TaskError.DatabaseError(it)
+            }
         }
     }
 
-    fun redoTask(id: String): Either<TaskError.DatabaseError, Task> {
+    fun redoTask(id: String): Either<TaskError, Task> {
         return Either.catch {
-            val findById = taskRepository.findById(id)
-            val task = findById.get()
+            val task = taskRepository.findById(id).get()
             task.completed = "N"
             taskRepository.save(task)
         }.mapLeft {
-            TaskError.DatabaseError(it)
+            if (it is NoSuchElementException) {
+                TaskError.NoSuchElementError(it)
+            } else {
+                TaskError.DatabaseError(it)
+            }
         }
     }
 
-    fun updateTask(id: String, task: Task): Either<TaskError.DatabaseError, Task> {
+    fun updateTask(id: String, task: Task): Either<TaskError, Task> {
         return Either.catch {
-            val findById = taskRepository.findById(id).get()
-            findById.message = task.message
-            findById.priority = task.priority
-            findById.reminderTime = task.reminderTime
-            taskRepository.save(findById)
+            val updateTask = taskRepository.findById(id).get()
+            updateTask.message = task.message
+            updateTask.priority = task.priority
+            updateTask.reminderTime = task.reminderTime
+            taskRepository.save(updateTask)
         }.mapLeft {
-            TaskError.DatabaseError(it)
+            if (it is NoSuchElementException) {
+                TaskError.NoSuchElementError(it)
+            } else {
+                TaskError.DatabaseError(it)
+            }
         }
     }
 

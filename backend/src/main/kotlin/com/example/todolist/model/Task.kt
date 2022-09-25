@@ -9,8 +9,8 @@ class Task {
     @Id
     var id = ""
     var message = ""
-    var completed = ""
-    var priority = ""
+    var completed = "N"
+    var priority = "Medium"
     var reminderTime = ""
 
 }

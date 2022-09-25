@@ -3,9 +3,11 @@ package com.example.todolist
 import com.example.todolist.util.MongodbTestContainers
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
+import org.junit.jupiter.api.BeforeEach
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.data.mongodb.core.MongoOperations
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 
@@ -14,6 +16,9 @@ class CommonTest {
 
     @LocalServerPort
     var port: Int = 0
+
+    @Autowired
+    private lateinit var mongoOperations: MongoOperations
 
     companion object {
 
@@ -40,6 +45,10 @@ class CommonTest {
         fun complete() {
             MongodbTestContainers.stop()
         }
+    }
 
+    @BeforeEach
+    fun clearUp() {
+        this.mongoOperations.dropCollection("task")
     }
 }

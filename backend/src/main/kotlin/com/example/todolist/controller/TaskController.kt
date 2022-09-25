@@ -19,9 +19,9 @@ class TaskController {
         return taskService.getTasks().fold(
             ifLeft = { err ->
                 TaskError.toResponse(err)
-             },
-            ifRight = { tasks ->
-                ResponseEntity.ok(tasks)
+            },
+            ifRight = {
+                ResponseEntity.ok(it)
             }
         )
     }
@@ -32,12 +32,8 @@ class TaskController {
             ifLeft = { err ->
                 TaskError.toResponse(err)
             },
-            ifRight = { optTask ->
-                if (optTask.isPresent) {
-                    ResponseEntity.ok(optTask.get())
-                } else {
-                    ResponseEntity.noContent().build()
-                }
+            ifRight = {
+                ResponseEntity.ok(it)
             }
         )
     }
@@ -48,8 +44,8 @@ class TaskController {
             ifLeft = { err ->
                 TaskError.toResponse(err)
             },
-            ifRight = { task ->
-                ResponseEntity.ok(task)
+            ifRight = {
+                ResponseEntity.ok(it)
             }
         )
     }
@@ -60,19 +56,20 @@ class TaskController {
             ifLeft = { err ->
                 TaskError.toResponse(err)
             },
-            ifRight = { task ->
-                ResponseEntity.ok(task)
+            ifRight = {
+                ResponseEntity.ok(it)
             }
         )
     }
+
     @PostMapping("/v1/tasks")
     fun createTask(@RequestBody task: Task): ResponseEntity<Any> {
         return taskService.createTask(task).fold(
             ifLeft = { err ->
                 TaskError.toResponse(err)
             },
-            ifRight = { task ->
-                ResponseEntity.ok(task)
+            ifRight = {
+                ResponseEntity.ok(it)
             }
         )
     }
@@ -83,8 +80,8 @@ class TaskController {
             ifLeft = { err ->
                 TaskError.toResponse(err)
             },
-            ifRight = { task ->
-                ResponseEntity.ok(task)
+            ifRight = {
+                ResponseEntity.ok(it)
             }
         )
     }
@@ -95,8 +92,8 @@ class TaskController {
             ifLeft = { err ->
                 TaskError.toResponse(err)
             },
-            ifRight = { id ->
-                ResponseEntity.ok(id)
+            ifRight = {
+                ResponseEntity.ok(it)
             }
         )
     }

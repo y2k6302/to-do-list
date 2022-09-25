@@ -14,7 +14,6 @@ import java.util.*
 class SequenceGeneratorService(val mongoOperations: MongoOperations) {
 
     fun generateSequence(seqName: String?): Long {
-
         val counter: DatabaseSequence? = mongoOperations.findAndModify(
             query(where("_id").`is`(seqName)),
             Update().inc("seq", 1), options().returnNew(true).upsert(true),
