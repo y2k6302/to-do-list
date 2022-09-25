@@ -1,11 +1,6 @@
-import { DatePipe } from '@angular/common'
 import { Component, OnInit } from '@angular/core'
-import { Subscription, timer } from 'rxjs'
-import { ToDoService } from 'src/app/service/task.service'
+import { TaskService } from 'src/app/service/task.service'
 import { Task } from 'src/app/types/tasks'
-import { SwPush } from '@angular/service-worker'
-import { pipe } from 'fp-ts/lib/function'
-import * as TE from 'fp-ts/TaskEither'
 
 @Component({
   selector: 'app-to-do-list',
@@ -19,52 +14,34 @@ export class ToDoListComponent implements OnInit {
   readonly priorities = ['Low', 'Medium', 'High']
   readonly sortMap = new Map([['High', 2], ['Medium', 1], ['Low', 0]])
 
-  toDoTasks!: Task[]
-  completedTasks!: Task[]
+  toDoTasks: Task[] = []
   inputMessage: string = ''
   inputPriority: string = 'Medium'
   inputReminderTime: Date | null = null
   action: string = ''
-  displayDialog: boolean = false;
+  displayDialog: boolean = false
   displayErrorDialog: boolean = false
   serverErrorMessage: string = ''
   selectTask: Task = { id: '', message: '', completed: 'N', priority: 'Medium' }
-  sw: ServiceWorkerRegistration | undefined = undefined
-  datePipe: DatePipe = new DatePipe('en-US')
-  timerMap = new Map<string, Subscription>()
   validationFailedMessage = ''
 
-  constructor(private toDoService: ToDoService, private swPush: SwPush) { }
-  
-  async ngOnInit(): Promise<void> {
+  constructor(private taskService: TaskService) { }
 
-    this.askNotificationPermission()
-    await this.getToDoTasks()
+  ngOnInit() {
+    this.getTasks()
   }
 
-  private async askNotificationPermission() {
-    if ('Notification' in window) {
-      const permission = await Notification.requestPermission()
-      if (permission === 'granted') {
-        this.sw = await navigator.serviceWorker.getRegistration()
+  getTasks() {
+    this.taskService.getTasks().subscribe({
+      next: (tasks) => {
+        this.toDoTasks = tasks
+        this.sortTasks()
+      },
+      error: (error) => {
+        this.displayErrorDialog = true
+        this.serverErrorMessage = error.message
       }
-    }
-  }
-
-  async getToDoTasks() {
-    await pipe(
-      this.toDoService.getTasks(),
-      TE.match(
-        error => {
-          this.displayErrorDialog = true
-          this.serverErrorMessage = error.message
-        },
-        tasks => {
-          this.toDoTasks = tasks
-          this.sortTasks()
-        }
-      )
-    )()
+    })
   }
 
   sortTasks() {
@@ -73,24 +50,22 @@ export class ToDoListComponent implements OnInit {
       //sort by completed
       if (x.completed === 'Y') {
         return 1
-      } else if(y.completed === 'Y') {
+      } else if (y.completed === 'Y') {
         return -1
       }
 
-      const xPriority: any = this.sortMap.get(x.priority)
-      const yPriority: any = this.sortMap.get(y.priority)
-
       //sort by priority
+      const xPriority: any = this.sortMap.get(x.priority)
+      const yPriority: any = this.sortMap.get(y.priority)      
       if (xPriority > yPriority) {
         return -1
       } else if (xPriority < yPriority) {
         return 1
       }
 
-      const xRemider = this.stringToDate(x.reminderTime)?.getTime()
-      const yRemider = this.stringToDate(y.reminderTime)?.getTime()
-
       //sort by remider
+      const xRemider = this.stringToDate(x.reminderTime)?.getTime()
+      const yRemider = this.stringToDate(y.reminderTime)?.getTime()      
       if (xRemider !== undefined && yRemider !== undefined) {
         if (xRemider > yRemider) {
           return 1
@@ -107,7 +82,7 @@ export class ToDoListComponent implements OnInit {
         return 1
       }
 
-      return 0;
+      return 0
     })
   }
 
@@ -117,40 +92,26 @@ export class ToDoListComponent implements OnInit {
     this.inputReminderTime = null
     this.validationFailedMessage = ''
     this.action = this.ADD
-    this.showDialog();
+    this.showDialog()
   }
 
-  async add() {
+  add() {
     if (this.validation()) {
       this.selectTask.message = this.inputMessage
       this.selectTask.priority = this.inputPriority
       this.selectTask.reminderTime = this.inputReminderTime?.toISOString()
 
-      await pipe(
-        this.toDoService.save(this.selectTask),
-        TE.match(
-          error => {
-            this.displayErrorDialog = true
-            this.serverErrorMessage = error.message
-          },
-          task => {
-            const saveTask = task
-            this.toDoTasks.push(saveTask)
-            this.sortTasks()
-            this.hideDialog();
-          }
-        )
-      )()
+      this.taskService.create(this.selectTask).subscribe({
+        next: (task) => {
+          this.getTasks()
+          this.hideDialog()
+        },
+        error: (error) => {
+          this.serverErrorMessage = error.message
+          this.showErrorDialog()
+        }
+      })
     }
-  }
-
-  validation() {
-    if (this.inputPriority === 'High' && (this.inputReminderTime === null || this.inputReminderTime.getTime() < Date.now())) {
-      this.validationFailedMessage = 'High priority task need available reminder time.'
-      return false
-    }
-    this.validationFailedMessage = ''
-    return true
   }
 
   editDialog(task: Task) {
@@ -160,75 +121,76 @@ export class ToDoListComponent implements OnInit {
     this.selectTask = task
     this.validationFailedMessage = ''
     this.action = this.EDIT
-    this.showDialog();
+    this.showDialog()
   }
 
-  async edit() {
+  edit() {
     if (this.validation()) {
       this.selectTask.message = this.inputMessage
       this.selectTask.priority = this.inputPriority
       this.selectTask.reminderTime = this.inputReminderTime?.toISOString()
 
-      await pipe(
-        this.toDoService.update(this.selectTask),
-        TE.match(
-          error => {
-            this.displayErrorDialog = true
-            this.serverErrorMessage = error.message
-          },
-          task => {
-            const updateTask = task
-            this.getToDoTasks();
-            this.hideDialog();
-          }
-        )
-      )()
+      this.taskService.update(this.selectTask).subscribe({
+        next: (task) => {
+          this.getTasks()
+          this.hideDialog()
+        },
+        error: (error) => {
+          this.serverErrorMessage = error.message
+          this.showErrorDialog()
+        }
+      })
     }
   }
 
-  async done(id: string) {
-    await pipe(
-      this.toDoService.complete(id),
-      TE.match(
-        error => {
-          this.displayErrorDialog = true
-          this.serverErrorMessage = error.message
-        },
-        _ => {
-          this.getToDoTasks();
-        }
-      )
-    )()
+  validation() {
+    if (!(this.inputMessage && this.inputPriority)) {
+      this.validationFailedMessage = "Message & priority can't be empty."
+      return false
+    }
+
+    if (this.inputPriority === 'High' && (this.inputReminderTime === null || this.inputReminderTime.getTime() < Date.now())) {
+      this.validationFailedMessage = 'High priority task need available reminder time.'
+      return false
+    }
+    this.validationFailedMessage = ''
+    return true
   }
 
-  async delete(id: string) {
-    await pipe(
-      this.toDoService.delete(id),
-      TE.match(
-        error => {
-          this.displayErrorDialog = true
-          this.serverErrorMessage = error.message
-        },
-        _ => {
-          this.toDoTasks = this.toDoTasks.filter(t => t.id !== id)
-        }
-      )
-    )()
+  done(id: string) {
+    this.taskService.complete(id).subscribe({
+      next: (task) => {
+        this.getTasks()
+      },
+      error: (error) => {
+        this.serverErrorMessage = error.message
+        this.showErrorDialog()
+      }
+    })
   }
 
-  async redo(id: string) {
-    await pipe(
-      this.toDoService.redo(id),
-      TE.match(
-        error => {
-          this.displayErrorDialog = true
-          this.serverErrorMessage = error.message
-        },
-        _ => {
-          this.getToDoTasks();
-        }
-      )
-    )()
+  delete(id: string) {
+    this.taskService.delete(id).subscribe({
+      next: (task) => {
+        this.toDoTasks = this.toDoTasks.filter(t => t.id !== id)
+      },
+      error: (error) => {
+        this.serverErrorMessage = error.message
+        this.showErrorDialog()
+      }
+    })
+  }
+
+  redo(id: string) {
+    this.taskService.redo(id).subscribe({
+      next: (task) => {
+        this.getTasks()
+      },
+      error: (error) => {
+        this.serverErrorMessage = error.message
+        this.showErrorDialog()
+      }
+    })
   }
 
   stringToDate(dateAsString: string | undefined) {
@@ -246,24 +208,28 @@ export class ToDoListComponent implements OnInit {
     return false
   }
 
-  closeErrorDialog() {
+  showDialog() {
+    this.displayDialog = true
+  }
+
+  hideDialog() {
+    this.displayDialog = false
+  }
+
+  showErrorDialog() {
+    this.displayErrorDialog = true
+  }
+
+  hideErrorDialog() {
     this.displayErrorDialog = false
     this.serverErrorMessage = ''
   }
 
-  showDialog() {
-    this.displayDialog = true;
-  }
-
-  hideDialog() {
-    this.displayDialog = false;
-  }
-
-  getBackGroupColer(proiory: string, completed: string):string {
+  getBackGroupColer(proiory: string, completed: string): string {
     if (completed === 'Y') {
       return 'gray'
     } else {
-      if(proiory === "High") {
+      if (proiory === "High") {
         return '#f2b9b96b'
       } else if (proiory === "Medium") {
         return 'rgba(186, 169, 14, 0.25)'

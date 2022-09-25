@@ -9,17 +9,12 @@ import { ToDoListComponent } from './features/to-do-list/to-do-list.component'
 import { HttpClientModule } from '@angular/common/http'
 import { TabViewModule } from 'primeng/tabview'
 import { ButtonModule } from 'primeng/button'
-import { OrderListModule } from 'primeng/orderlist'
 import { DialogModule } from 'primeng/dialog'
 import { InputTextModule } from 'primeng/inputtext'
 import { FormsModule } from '@angular/forms'
-import { ServiceWorkerModule } from '@angular/service-worker'
-import { environment } from '../environments/environment'
 import { CalendarModule } from 'primeng/calendar'
 import { DropdownModule } from 'primeng/dropdown'
 import { ImageModule } from 'primeng/image'
-import { CheckboxModule } from 'primeng/checkbox';
-import { DividerModule } from 'primeng/divider';
 import { CardModule } from 'primeng/card';
 
 
@@ -30,25 +25,18 @@ import { CardModule } from 'primeng/card';
   ],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
     AppRoutingModule,
     HttpClientModule,
-    OrderListModule,
     TabViewModule,
     ButtonModule,
     DialogModule,
-    BrowserAnimationsModule,
     InputTextModule,
     FormsModule,
     CalendarModule,
     DropdownModule,
     ImageModule,
-    CheckboxModule,
-    DividerModule,
-    CardModule,
-    ServiceWorkerModule.register('ngsw-worker.js', {
-      enabled: environment.production,
-      registrationStrategy: 'registerWhenStable:30000'
-    })
+    CardModule
   ],
   providers: [],
   bootstrap: [AppComponent]

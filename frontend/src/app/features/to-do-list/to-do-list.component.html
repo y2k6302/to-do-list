@@ -10,9 +10,9 @@
         (click)="addDialoag()" style="margin: 5px;"></button>
     </div>
 
-    <div>
+    <div style="display: flex; flex-flow: row; flex-wrap: wrap">
       <p-card *ngFor="let task of toDoTasks;"
-        [style]="{width: '360px', margin: '10px',float: 'left', backgroundColor:getBackGroupColer(task.priority, task.completed)}"
+        [style]="{width: '360px', margin: '10px', backgroundColor:getBackGroupColer(task.priority, task.completed)}"
         styleClass="p-card-shadow">
         
         <ng-template pTemplate="title">
@@ -81,6 +81,6 @@
   </div>
   <ng-template pTemplate="footer">
     <button pButton pRipple type="button" label="close" icon="pi pi-save"
-      class="p-button-rounded p-button-info p-button-sm" (click)="closeErrorDialog()"></button>
+      class="p-button-sm" (click)="hideErrorDialog()"></button>
   </ng-template>
 </p-dialog>
