@@ -40,7 +40,6 @@ class TaskControllerTest : CommonTest() {
             ifEmpty = { Assertions.fail("response is null") },
             ifSome = {
                 Assertions.assertEquals("testGetTaskById", it.message)
-                Assertions.assertEquals("Medium", it.priority)
             }
         )
     }
@@ -104,7 +103,7 @@ class TaskControllerTest : CommonTest() {
         response.body.toOption().fold(
             ifEmpty = { Assertions.fail("response is null") },
             ifSome = {
-                Assertions.assertEquals("N", it.completed)
+                Assertions.assertEquals("testCreateTask", it.message)
             }
         )
     }

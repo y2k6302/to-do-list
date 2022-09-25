@@ -200,10 +200,10 @@ export class ToDoListComponent implements OnInit {
     return null
   }
 
-  isExpired(reminderTime: string) {
+  isExpired(reminderTime: string | undefined) {
     const time = this.stringToDate(reminderTime)
     if (time) {
-      return time.getTime() < Date.now()
+      return time.getTime() <= Date.now()
     }
     return false
   }

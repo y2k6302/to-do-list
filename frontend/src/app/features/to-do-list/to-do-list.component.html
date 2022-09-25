@@ -21,8 +21,8 @@
         
         <ng-template pTemplate="content">
           <p *ngIf="task.reminderTime">{{ task.reminderTime | date : 'yyyy-MM-dd HH:mm'}} 
-            <p-image *ngIf="task.completed === 'N' && isExpired(task.reminderTime)" src="assets/images/expired.png" width="100"></p-image>
-          </p>
+            <p-image *ngIf="task.completed === 'N' && isExpired(task.reminderTime)" src="assets/images/notification.png" width="50"></p-image>  
+          </p>          
         </ng-template>
 
         <ng-component *ngIf="task.completed === 'Y' then completed else notComplete"></ng-component>

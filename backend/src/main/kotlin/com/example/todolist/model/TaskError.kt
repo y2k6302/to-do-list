@@ -7,7 +7,7 @@ sealed class TaskError {
     data class DatabaseError(val t: Throwable): TaskError()
 
     companion object {
-        fun toResponse(taskError: TaskError): ResponseEntity<Any> = when(taskError) {
+        fun toResponse(taskError: TaskError): ResponseEntity<String> = when(taskError) {
             is DatabaseError -> {
                 ResponseEntity.internalServerError().body("Internal server error!")
             }
