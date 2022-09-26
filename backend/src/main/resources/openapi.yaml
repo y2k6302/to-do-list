@@ -1,0 +1,314 @@
+openapi: 3.0.0
+info:
+  title: Todolist API
+  version: 1.0.0
+# servers:
+#   - url: http://api.example.com/v1
+#     description: Optional server description, e.g. Main (production) server
+#   - url: http://staging-api.example.com
+#     description: Optional server description, e.g. Internal staging server for testing
+paths:
+  /v1/tasks:
+    get:
+      summary: Get a list of tasks.
+      tags:
+        - GET
+      responses:
+        '200':
+          description: Get a list of tasks success.
+          content:
+            application/json:
+              schema: 
+                type: array
+                items: 
+                  $ref: "#/components/schemas/Task"
+              example:
+                  - id: 1
+                    message: task message
+                    completed: Y
+                    priority: High
+                    reminderTime: 2022-09-26T13:41:47.000Z
+                  - id: 2
+                    message: task message2
+                    completed: N
+                    priority: Medium
+                    reminderTime: 2022-09-26T13:41:47.000Z
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                  message: Internal server error.
+    post:
+      summary: Create a task.
+      description: Create a task.
+      tags:
+        - POST
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskRequestBody"
+            example:
+              - id: 1
+                message: task message
+                completed: Y
+                priority: High
+                reminderTime: 2022-09-26T13:41:47.000Z
+      responses:
+        '201':
+          description: Create task success.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/Task"
+              example:
+                - id: 3
+                  message: created task
+                  completed: N
+                  priority: High
+                  reminderTime: 2022-09-26T13:41:47.000Z
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                  message: Internal server error.
+  /v1/tasks/{id}:
+    get:
+      summary: Get a task.
+      description: Get a task.
+      tags:
+        - GET
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Get a task success.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+              example:
+                - id: 3
+                  message: a task
+                  completed: N
+                  priority: High
+                  reminderTime: 2022-09-26T13:41:47.000Z
+        '400':
+          description: Failed to get tasks with invalid request body.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                message: Value not present or request was malformed.
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                  message: Internal server error.
+    put:
+      summary: Update a task.
+      description: Update a task.
+      tags:
+        - PUT
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Update task success.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+              example:
+                - id: 3
+                  message: update message
+                  completed: N
+                  priority: High
+                  reminderTime: 2022-09-26T13:41:47.000Z
+        '400':
+          description: Failed to get tasks with invalid request body.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                message: Value not present or request was malformed.
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                  message: Internal server error. 
+    delete:
+      summary: Delete a task.
+      description: Delete a task.
+      tags:
+        - DELETE
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Delete task success.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 3
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                  message: Internal server error. 
+  /v1/tasks/{id}/complete:
+    put:
+      summary: Complete a task.
+      description: Complete a task.
+      tags:
+        - PUT
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Complete task success.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+              example:
+                - id: 3
+                  message: complete message
+                  completed: Y
+                  priority: High
+                  reminderTime: 2022-09-26T13:41:47.000Z
+        '400':
+          description: Failed to get tasks with invalid request body.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                message: Value not present or request was malformed.
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                  message: Internal server error. 
+  /v1/tasks/{id}/redo:
+    put:
+      summary: Redo a task.
+      description: Redo a task.
+      tags:
+        - PUT
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Redo task success.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+              example:
+                - id: 3
+                  message: redo message
+                  completed: N
+                  priority: High
+                  reminderTime: 2022-09-26T13:41:47.000Z
+        '400':
+          description: Failed to get tasks with invalid request body.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                message: Value not present or request was malformed.
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                  message: Internal server error. 
+
+components:
+  schemas:
+    Task:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The id of task.
+        message:
+          type: string
+          description: The message of task.
+        completed:
+          type: string
+          description: The completed of task.
+        priority:
+          type: string
+          description: The priority of task.
+        reminderTime:
+          type: string
+          description: The reminderTime of task.
+    TaskRequestBody:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The id of task.
+        message:
+          type: string
+          description: The message of task.
+        completed:
+          type: string
+          description: The completed of task.
+        priority:
+          type: string
+          description: The priority of task.
+        reminderTime:
+          type: string
+          description: The reminderTime of task.
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
