@@ -23,5 +23,5 @@ Run `cd backend` & `mvn test`
 
 Run `cd frontend` & `npm start`  
 Run `cd backend` & `java -jar target/todolist-0.0.1-SNAPSHOT.jar`  
-Navigate to `http://localhost:8081/`
+Navigate to `http://localhost:4200`
  
