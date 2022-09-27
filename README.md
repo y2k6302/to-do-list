@@ -7,6 +7,9 @@ You can run following command in docker.
 `docker run --name db -d -p 27017:27017 mongo`  
 more details via [Mongo - Official Image](https://hub.docker.com/_/mongo)
 
+* NodeJS:  
+Download [Node.JS](https://nodejs.org/en/) and install [ng](https://www.npmjs.com/package/@angular/cli)
+
 ## Install dependencis
 
 Run `cd frontend` & `npm install`  
