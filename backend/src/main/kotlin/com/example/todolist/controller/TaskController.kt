@@ -11,7 +11,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
-@CrossOrigin("http://127.0.0.1:4200")
+@CrossOrigin("http://localhost:4200")
 @RestController
 class TaskController {
 
