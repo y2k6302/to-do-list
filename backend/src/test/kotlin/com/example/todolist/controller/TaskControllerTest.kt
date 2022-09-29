@@ -1,180 +1,204 @@
 package com.example.todolist.controller
 
 import arrow.core.getOrElse
-import arrow.core.toOption
 import com.example.todolist.CommonTest
 import com.example.todolist.model.Task
 import com.example.todolist.service.TaskService
+import io.restassured.http.ContentType
+import io.restassured.module.kotlin.extensions.Given
+import io.restassured.module.kotlin.extensions.Then
+import io.restassured.module.kotlin.extensions.When
+import org.hamcrest.Matchers.equalTo
+import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpMethod
-import org.springframework.web.client.RestTemplate
-import org.springframework.web.client.exchange
+import org.springframework.http.HttpStatus
 
 class TaskControllerTest : CommonTest() {
 
     @Autowired
     private lateinit var taskService: TaskService
 
-    private val restTemplate = RestTemplate()
+    @Test
+    fun testGetTasks() {
+        Given {
+            val task = Task()
+            task.message = "testGetTasks"
+            taskService.createTask(task)
+            contentType(ContentType.JSON)
+        } When {
+            get("http://localhost:$port/v1/tasks")
+        } Then {
+            statusCode(HttpStatus.OK.value())
+            body("size()", `is`(1))
+            body("[0].message", equalTo("testGetTasks"))
+        }
+    }
 
     @Test
     fun testGetTaskById() {
-        // Arrange
-        val task = Task()
-        task.message = "testGetTaskById"
-        val orElse = taskService.createTask(task).getOrElse { Task() }
+        var id = ""
+        Given {
+            val task = Task()
+            task.message = "testGetTaskById"
+            id = taskService.createTask(task).getOrElse { Task() }.id
+            contentType(ContentType.JSON)
+        } When {
+            get("http://localhost:$port/v1/tasks/${id}")
+        } Then {
+            statusCode(HttpStatus.OK.value())
+            body("message", equalTo("testGetTaskById"))
+        }
+    }
 
-        // Act
-        val response = restTemplate.exchange<Task>(
-            "http://localhost:$port/v1/tasks/${orElse.id}",
-            HttpMethod.GET,
-            null,
-            Task::class
-        )
-
-        // Assert
-        response.body.toOption().fold(
-            ifEmpty = { Assertions.fail("response is null") },
-            ifSome = {
-                Assertions.assertEquals("testGetTaskById", it.message)
-            }
-        )
+    @Test
+    fun testGetTaskByIdＷhenIdNotExist() {
+        Given {
+            contentType(ContentType.JSON)
+        } When {
+            get("http://localhost:$port/v1/tasks/-1")
+        } Then {
+            statusCode(HttpStatus.BAD_REQUEST.value())
+            body("message", equalTo("Value not present or request was malformed."))
+        }
     }
 
     @Test
     fun testCompleteTask() {
-        val task = Task()
-        task.message = "testCompleteTask"
-        task.completed = "N"
-        val orElse = taskService.createTask(task).getOrElse { Task() }
+        var id = ""
+        Given {
+            val task = Task()
+            task.message = "testCompleteTask"
+            task.completed = "N"
+            id = taskService.createTask(task).getOrElse { Task() }.id
+            contentType(ContentType.JSON)
+        } When {
+            put("http://localhost:$port/v1/tasks/${id}/complete")
+        } Then {
+            statusCode(HttpStatus.OK.value())
+            body("completed", equalTo("Y"))
+        }
+    }
 
-        val response = restTemplate.exchange<Task>(
-            "http://localhost:$port/v1/tasks/${orElse.id}/complete",
-            HttpMethod.PUT,
-            null,
-            Task::class
-        )
-
-        response.body.toOption().fold(
-            ifEmpty = { Assertions.fail("response is null") },
-            ifSome = {
-                Assertions.assertEquals("Y", it.completed)
-            }
-        )
+    @Test
+    fun testCompleteTaskＷhenIdNotExist() {
+        Given {
+            contentType(ContentType.JSON)
+        } When {
+            put("http://localhost:$port/v1/tasks/-1/complete")
+        } Then {
+            statusCode(HttpStatus.BAD_REQUEST.value())
+            body("message", equalTo("Value not present or request was malformed."))
+        }
     }
 
     @Test
     fun testRedo() {
-        val task = Task()
-        task.message = "testRedo"
-        task.completed = "Y"
-        val orElse = taskService.createTask(task).getOrElse { Task() }
+        var id = ""
+        Given {
+            val task = Task()
+            task.message = "testRedo"
+            task.completed = "Y"
+            id = taskService.createTask(task).getOrElse { Task() }.id
+            contentType(ContentType.JSON)
+        } When {
+            put("http://localhost:$port/v1/tasks/${id}/redo")
+        } Then {
+            statusCode(HttpStatus.OK.value())
+            body("completed", equalTo("N"))
+        }
+    }
 
-        val response = restTemplate.exchange<Task>(
-            "http://localhost:$port/v1/tasks/${orElse.id}/redo",
-            HttpMethod.PUT,
-            null,
-            Task::class
-        )
-
-        response.body.toOption().fold(
-            ifEmpty = { Assertions.fail("response is null") },
-            ifSome = {
-                Assertions.assertEquals("N", it.completed)
-            }
-        )
+    @Test
+    fun testRedoＷhenIdNotExist() {
+        Given {
+            contentType(ContentType.JSON)
+        } When {
+            put("http://localhost:$port/v1/tasks/-1/redo")
+        } Then {
+            statusCode(HttpStatus.BAD_REQUEST.value())
+            body("message", equalTo("Value not present or request was malformed."))
+        }
     }
 
     @Test
     fun testCreateTask() {
-        val task = Task()
-        task.message = "testCreateTask"
-
-        val response = restTemplate.exchange<Task>(
-            "http://localhost:$port/v1/tasks",
-            HttpMethod.POST,
-            HttpEntity(task),
-            Task::class
-        )
-
-        response.body.toOption().fold(
-            ifEmpty = { Assertions.fail("response is null") },
-            ifSome = {
-                Assertions.assertEquals("testCreateTask", it.message)
-            }
-        )
+        Given {
+            val task = Task()
+            task.message = "testCreateTask"
+            body(task)
+            contentType(ContentType.JSON)
+        } When {
+            post("http://localhost:$port/v1/tasks")
+        } Then {
+            statusCode(HttpStatus.CREATED.value())
+            body("message", equalTo("testCreateTask"))
+        }
     }
 
     @Test
     fun testUpdateTask() {
-        val beforeTask = Task()
-        beforeTask.message = "testUpdateTask-before"
-        val updateTask = taskService.createTask(beforeTask).getOrElse { Task() }
+        var id = ""
+        Given {
+            val beforeTask = Task()
+            beforeTask.message = "testUpdateTask-before"
+            val updateTask = taskService.createTask(beforeTask).getOrElse { Task() }
+            id = updateTask.id
 
-        updateTask.message = "testUpdateTask-update"
-        updateTask.priority = "High"
+            updateTask.message = "testUpdateTask-update"
+            updateTask.priority = "High"
 
-        val response = restTemplate.exchange<Task>(
-            "http://localhost:$port/v1/tasks/${updateTask.id}",
-            HttpMethod.PUT,
-            HttpEntity(updateTask),
-            Task::class
-        )
+            body(updateTask)
+            contentType(ContentType.JSON)
+        } When {
+            put("http://localhost:$port/v1/tasks/${id}")
+        } Then {
+            statusCode(HttpStatus.OK.value())
+            body("message", equalTo("testUpdateTask-update"))
+            body("priority", equalTo("High"))
+        }
+    }
 
-        response.body.toOption().fold(
-            ifEmpty = { Assertions.fail("response is null") },
-            ifSome = {
-                Assertions.assertEquals("testUpdateTask-update", it.message)
-                Assertions.assertEquals("High", it.priority)
-            }
-        )
+    @Test
+    fun testUpdateTaskＷhenIdNotExist() {
+        Given {
+            body(Task())
+            contentType(ContentType.JSON)
+        } When {
+            put("http://localhost:$port/v1/tasks/-1")
+        } Then {
+            statusCode(HttpStatus.BAD_REQUEST.value())
+            body("message", equalTo("Value not present or request was malformed."))
+        }
     }
 
     @Test
     fun testDeleteTask() {
-        val task = Task()
-        task.message = "testDeleteTask"
-        val orElse = taskService.createTask(task).getOrElse { Task() }
-
-        val response = restTemplate.exchange<String>(
-            "http://localhost:$port/v1/tasks/${orElse.id}",
-            HttpMethod.DELETE,
-            null,
-            String::class
-        )
-        val optTask = taskService.getTaskById(orElse.id)
-
-        response.body.toOption().fold(
-            ifEmpty = { Assertions.fail("response is null") },
-            ifSome = {
-                Assertions.assertEquals(orElse.id, it)
-                Assertions.assertTrue(optTask.isEmpty())
-            }
-        )
+        var id = ""
+        Given {
+            val task = Task()
+            task.message = "testDeleteTask"
+            id = taskService.createTask(task).getOrElse { Task() }.id
+            contentType(ContentType.JSON)
+        } When {
+            delete("http://localhost:$port/v1/tasks/${id}")
+        } Then {
+            statusCode(HttpStatus.OK.value())
+            body("message", equalTo(id))
+            Assertions.assertTrue(taskService.getTaskById(id).isEmpty())
+        }
     }
 
     @Test
-    fun testGetTasks() {
-        val task = Task()
-        task.message = "testGetTasks"
-        taskService.createTask(task)
-
-        val response = restTemplate.exchange<List<Task>>(
-            "http://localhost:$port/v1/tasks",
-            HttpMethod.GET,
-            null,
-            List::class
-        )
-
-        response.body.toOption().fold(
-            ifEmpty = { Assertions.fail("response is null") },
-            ifSome = { tasks ->
-                Assertions.assertEquals(1, tasks.size)
-                Assertions.assertEquals("testGetTasks", tasks[0].message)
-            }
-        )
+    fun testDeleteTaskＷhenIdNotExist() {
+        Given {
+            contentType(ContentType.JSON)
+        } When {
+            delete("http://localhost:$port/v1/tasks/-1")
+        } Then {
+            statusCode(HttpStatus.BAD_REQUEST.value())
+            body("message", equalTo("Value not present or request was malformed."))
+        }
     }
 }

@@ -1,6 +1,7 @@
 package com.example.todolist.service
 
 import arrow.core.Either
+import com.example.todolist.model.CustomResponse
 import com.example.todolist.model.Task
 import com.example.todolist.model.TaskError
 import com.example.todolist.repository.TaskRepository
@@ -91,12 +92,17 @@ class TaskService {
         }
     }
 
-    fun deleteTask(id: String): Either<TaskError.DatabaseError, String> {
+    fun deleteTask(id: String): Either<TaskError, CustomResponse> {
         return Either.catch {
-            taskRepository.deleteById(id)
-            id
+            val deleteTask = taskRepository.findById(id).get()
+            taskRepository.delete(deleteTask)
+            CustomResponse(id)
         }.mapLeft {
-            TaskError.DatabaseError(it)
+            if (it is NoSuchElementException) {
+                TaskError.NoSuchElementError(it)
+            } else {
+                TaskError.DatabaseError(it)
+            }
         }
     }
 }

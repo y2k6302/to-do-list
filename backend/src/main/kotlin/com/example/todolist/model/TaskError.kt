@@ -1,6 +1,5 @@
 package com.example.todolist.model
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.springframework.http.ResponseEntity
@@ -12,19 +11,13 @@ sealed class TaskError {
     companion object {
         fun toResponse(taskError: TaskError): ResponseEntity<String> = when (taskError) {
             is DatabaseError -> {
-                ResponseEntity.internalServerError().body(Json.encodeToString(ErrorResponse("Internal server error.")))
+                ResponseEntity.internalServerError().body(Json.encodeToString(CustomResponse("Internal server error.")))
             }
 
             is NoSuchElementError -> {
-                ResponseEntity.badRequest().body(Json.encodeToString(ErrorResponse("Value not present or request was malformed.")))
+                ResponseEntity.badRequest()
+                    .body(Json.encodeToString(CustomResponse("Value not present or request was malformed.")))
             }
         }
     }
-
 }
-
-@Serializable
-private data class ErrorResponse(
-    var message: String = ""
-)
-

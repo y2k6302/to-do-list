@@ -97,7 +97,7 @@ class TaskController {
                 TaskError.toResponse(err)
             },
             ifRight = {
-                ResponseEntity.ok(it)
+                ResponseEntity.ok(Json.encodeToString(it))
             }
         )
     }
