@@ -130,6 +130,12 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskRequestBody"
       responses:
         '200':
           description: Update task success.
@@ -307,6 +313,10 @@ components:
         reminderTime:
           type: string
           description: The reminderTime of task.
+      required: 
+        - message
+        - completed
+        - priority
     ErrorResponse:
       type: object
       properties:
