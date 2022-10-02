@@ -1,8 +1,10 @@
 package com.example.todolist.controller
 
+import arrow.core.flatMap
 import com.example.todolist.model.Task
 import com.example.todolist.model.TaskError
 import com.example.todolist.service.TaskService
+import com.example.todolist.service.util.Validation
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.springframework.beans.factory.annotation.Autowired
@@ -68,7 +70,9 @@ class TaskController {
 
     @PostMapping("/v1/tasks", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun createTask(@RequestBody task: Task): ResponseEntity<String> {
-        return taskService.createTask(task).fold(
+        return Validation.checkTaskReqBody(task).flatMap {
+            taskService.createTask(it)
+        }.fold(
             ifLeft = { err ->
                 TaskError.toResponse(err)
             },
@@ -80,7 +84,9 @@ class TaskController {
 
     @PutMapping("/v1/tasks/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun updateTask(@PathVariable id: String, @RequestBody task: Task): ResponseEntity<String> {
-        return taskService.updateTask(id, task).fold(
+        return Validation.checkTaskReqBody(task).flatMap{
+            taskService.updateTask(id, it)
+        }.fold(
             ifLeft = { err ->
                 TaskError.toResponse(err)
             },

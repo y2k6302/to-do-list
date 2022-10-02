@@ -8,8 +8,7 @@ import io.restassured.http.ContentType
 import io.restassured.module.kotlin.extensions.Given
 import io.restassured.module.kotlin.extensions.Then
 import io.restassured.module.kotlin.extensions.When
-import org.hamcrest.Matchers.equalTo
-import org.hamcrest.Matchers.`is`
+import org.hamcrest.Matchers.*
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -60,7 +59,7 @@ class TaskControllerTest : CommonTest() {
             get("http://localhost:$port/v1/tasks/-1")
         } Then {
             statusCode(HttpStatus.BAD_REQUEST.value())
-            body("message", equalTo("Value not present or request was malformed."))
+            body("message", containsString("Value not present or request was malformed"))
         }
     }
 
@@ -89,7 +88,7 @@ class TaskControllerTest : CommonTest() {
             put("http://localhost:$port/v1/tasks/-1/complete")
         } Then {
             statusCode(HttpStatus.BAD_REQUEST.value())
-            body("message", equalTo("Value not present or request was malformed."))
+            body("message", containsString("Value not present or request was malformed"))
         }
     }
 
@@ -118,7 +117,7 @@ class TaskControllerTest : CommonTest() {
             put("http://localhost:$port/v1/tasks/-1/redo")
         } Then {
             statusCode(HttpStatus.BAD_REQUEST.value())
-            body("message", equalTo("Value not present or request was malformed."))
+            body("message", containsString("Value not present or request was malformed"))
         }
     }
 
@@ -127,6 +126,8 @@ class TaskControllerTest : CommonTest() {
         Given {
             val task = Task()
             task.message = "testCreateTask"
+            task.completed = "N"
+            task.priority = "Medium"
             body(task)
             contentType(ContentType.JSON)
         } When {
@@ -134,6 +135,21 @@ class TaskControllerTest : CommonTest() {
         } Then {
             statusCode(HttpStatus.CREATED.value())
             body("message", equalTo("testCreateTask"))
+        }
+    }
+
+    @Test
+    fun testCreateTaskWhenReqBodyInvalid() {
+        Given {
+            val task = Task()
+            task.message = "testCreateTask"
+            body(task)
+            contentType(ContentType.JSON)
+        } When {
+            post("http://localhost:$port/v1/tasks")
+        } Then {
+            statusCode(HttpStatus.BAD_REQUEST.value())
+            body("message", containsString("Invalid request"))
         }
     }
 
@@ -147,6 +163,7 @@ class TaskControllerTest : CommonTest() {
             id = updateTask.id
 
             updateTask.message = "testUpdateTask-update"
+            updateTask.completed = "N"
             updateTask.priority = "High"
 
             body(updateTask)
@@ -163,13 +180,32 @@ class TaskControllerTest : CommonTest() {
     @Test
     fun testUpdateTaskＷhenIdNotExist() {
         Given {
+            val updateTask = Task()
+            updateTask.id = "-1"
+            updateTask.message = "testCreateTask"
+            updateTask.priority = "Low"
+            updateTask.completed = "N"
+
+            body(updateTask)
+            contentType(ContentType.JSON)
+        } When {
+            put("http://localhost:$port/v1/tasks/-1")
+        } Then {
+            statusCode(HttpStatus.BAD_REQUEST.value())
+            body("message", containsString("Value not present or request was malformed"))
+        }
+    }
+
+    @Test
+    fun testUpdateTaskＷhenReqBodyInvalid() {
+        Given {
             body(Task())
             contentType(ContentType.JSON)
         } When {
             put("http://localhost:$port/v1/tasks/-1")
         } Then {
             statusCode(HttpStatus.BAD_REQUEST.value())
-            body("message", equalTo("Value not present or request was malformed."))
+            body("message", containsString("Invalid request"))
         }
     }
 
@@ -198,7 +234,7 @@ class TaskControllerTest : CommonTest() {
             delete("http://localhost:$port/v1/tasks/-1")
         } Then {
             statusCode(HttpStatus.BAD_REQUEST.value())
-            body("message", equalTo("Value not present or request was malformed."))
+            body("message", containsString("Value not present or request was malformed"))
         }
     }
 }
