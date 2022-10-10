@@ -226,7 +226,7 @@ export class ToDoListComponent implements OnInit {
     this.serverErrorMessage = ''
   }
 
-  getBackGroupColer(message: string, proiory: string, completed: string): string {
+  getBackGroupColer(proiory: string, completed: string): string {
     if (completed === Completed.Y) {
       return 'gray'
     } else {
