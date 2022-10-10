@@ -51,4 +51,5 @@ class CommonTest {
     fun clearUp() {
         this.mongoOperations.dropCollection("task")
     }
+
 }

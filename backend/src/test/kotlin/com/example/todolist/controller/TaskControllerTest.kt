@@ -1,7 +1,8 @@
 package com.example.todolist.controller
 
-import arrow.core.getOrElse
 import com.example.todolist.CommonTest
+import com.example.todolist.model.Completed
+import com.example.todolist.model.Priority
 import com.example.todolist.model.Task
 import com.example.todolist.service.TaskService
 import io.restassured.http.ContentType
@@ -10,6 +11,7 @@ import io.restassured.module.kotlin.extensions.Then
 import io.restassured.module.kotlin.extensions.When
 import org.hamcrest.Matchers.*
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -19,12 +21,18 @@ class TaskControllerTest : CommonTest() {
     @Autowired
     private lateinit var taskService: TaskService
 
+    private lateinit var task: Task
+
+    @BeforeEach
+    fun test() {
+        task = Task("", "", Completed.N, Priority.MEDIUM, "")
+    }
+
     @Test
     fun testGetTasks() {
         Given {
-            val task = Task()
             task.message = "testGetTasks"
-            taskService.createTask(task)
+            createTask(task)
             contentType(ContentType.JSON)
         } When {
             get("http://localhost:$port/v1/tasks")
@@ -39,9 +47,8 @@ class TaskControllerTest : CommonTest() {
     fun testGetTaskById() {
         var id = ""
         Given {
-            val task = Task()
             task.message = "testGetTaskById"
-            id = taskService.createTask(task).getOrElse { Task() }.id
+            id = createTask(task).id
             contentType(ContentType.JSON)
         } When {
             get("http://localhost:$port/v1/tasks/${id}")
@@ -67,16 +74,15 @@ class TaskControllerTest : CommonTest() {
     fun testCompleteTask() {
         var id = ""
         Given {
-            val task = Task()
             task.message = "testCompleteTask"
-            task.completed = "N"
-            id = taskService.createTask(task).getOrElse { Task() }.id
+            task.completed = Completed.N
+            id = createTask(task).id
             contentType(ContentType.JSON)
         } When {
             put("http://localhost:$port/v1/tasks/${id}/complete")
         } Then {
             statusCode(HttpStatus.OK.value())
-            body("completed", equalTo("Y"))
+            body("completed", equalTo(Completed.Y.name))
         }
     }
 
@@ -93,19 +99,18 @@ class TaskControllerTest : CommonTest() {
     }
 
     @Test
-    fun testRedo() {
+    fun testReopen() {
         var id = ""
         Given {
-            val task = Task()
-            task.message = "testRedo"
-            task.completed = "Y"
-            id = taskService.createTask(task).getOrElse { Task() }.id
+            task.message = "testReopen"
+            task.completed = Completed.Y
+            id = createTask(task).id
             contentType(ContentType.JSON)
         } When {
-            put("http://localhost:$port/v1/tasks/${id}/redo")
+            put("http://localhost:$port/v1/tasks/${id}/reopen")
         } Then {
             statusCode(HttpStatus.OK.value())
-            body("completed", equalTo("N"))
+            body("completed", equalTo(Completed.N.name))
         }
     }
 
@@ -114,7 +119,7 @@ class TaskControllerTest : CommonTest() {
         Given {
             contentType(ContentType.JSON)
         } When {
-            put("http://localhost:$port/v1/tasks/-1/redo")
+            put("http://localhost:$port/v1/tasks/-1/reopen")
         } Then {
             statusCode(HttpStatus.BAD_REQUEST.value())
             body("message", containsString("Value not present or request was malformed"))
@@ -124,10 +129,9 @@ class TaskControllerTest : CommonTest() {
     @Test
     fun testCreateTask() {
         Given {
-            val task = Task()
             task.message = "testCreateTask"
-            task.completed = "N"
-            task.priority = "Medium"
+            task.completed = Completed.N
+            task.priority = Priority.MEDIUM
             body(task)
             contentType(ContentType.JSON)
         } When {
@@ -141,8 +145,7 @@ class TaskControllerTest : CommonTest() {
     @Test
     fun testCreateTaskWhenReqBodyInvalid() {
         Given {
-            val task = Task()
-            task.message = "testCreateTask"
+            task.message = ""
             body(task)
             contentType(ContentType.JSON)
         } When {
@@ -157,14 +160,13 @@ class TaskControllerTest : CommonTest() {
     fun testUpdateTask() {
         var id = ""
         Given {
-            val beforeTask = Task()
-            beforeTask.message = "testUpdateTask-before"
-            val updateTask = taskService.createTask(beforeTask).getOrElse { Task() }
+            task.message = "testUpdateTask-before"
+            val updateTask = createTask(task)
             id = updateTask.id
 
             updateTask.message = "testUpdateTask-update"
-            updateTask.completed = "N"
-            updateTask.priority = "High"
+            updateTask.completed = Completed.N
+            updateTask.priority = Priority.HIGH
 
             body(updateTask)
             contentType(ContentType.JSON)
@@ -173,20 +175,19 @@ class TaskControllerTest : CommonTest() {
         } Then {
             statusCode(HttpStatus.OK.value())
             body("message", equalTo("testUpdateTask-update"))
-            body("priority", equalTo("High"))
+            body("priority", equalTo("HIGH"))
         }
     }
 
     @Test
     fun testUpdateTaskＷhenIdNotExist() {
         Given {
-            val updateTask = Task()
-            updateTask.id = "-1"
-            updateTask.message = "testCreateTask"
-            updateTask.priority = "Low"
-            updateTask.completed = "N"
+            task.id = "-1"
+            task.message = "testCreateTask"
+            task.priority = Priority.LOW
+            task.completed = Completed.N
 
-            body(updateTask)
+            body(task)
             contentType(ContentType.JSON)
         } When {
             put("http://localhost:$port/v1/tasks/-1")
@@ -199,7 +200,7 @@ class TaskControllerTest : CommonTest() {
     @Test
     fun testUpdateTaskＷhenReqBodyInvalid() {
         Given {
-            body(Task())
+            body(task)
             contentType(ContentType.JSON)
         } When {
             put("http://localhost:$port/v1/tasks/-1")
@@ -213,9 +214,8 @@ class TaskControllerTest : CommonTest() {
     fun testDeleteTask() {
         var id = ""
         Given {
-            val task = Task()
             task.message = "testDeleteTask"
-            id = taskService.createTask(task).getOrElse { Task() }.id
+            id = createTask(task).id
             contentType(ContentType.JSON)
         } When {
             delete("http://localhost:$port/v1/tasks/${id}")
@@ -236,5 +236,12 @@ class TaskControllerTest : CommonTest() {
             statusCode(HttpStatus.BAD_REQUEST.value())
             body("message", containsString("Value not present or request was malformed"))
         }
+    }
+
+    private fun createTask(task: Task): Task {
+        taskService.createTask(task).fold(
+            ifLeft = { Assertions.fail("create task fail.") },
+            ifRight = { return it }
+        )
     }
 }

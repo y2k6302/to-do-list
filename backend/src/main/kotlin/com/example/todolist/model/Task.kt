@@ -11,7 +11,15 @@ data class Task(
     @Id
     var id: String = "",
     var message: String = "",
-    var completed: String = "",
-    var priority: String = "",
+    var completed: Completed = Completed.N,
+    var priority: Priority = Priority.MEDIUM,
     var reminderTime: String = ""
 )
+
+enum class Completed {
+    Y, N
+}
+
+enum class Priority {
+    HIGH, MEDIUM, LOW
+}

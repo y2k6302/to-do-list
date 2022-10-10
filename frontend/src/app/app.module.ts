@@ -15,7 +15,8 @@ import { FormsModule } from '@angular/forms'
 import { CalendarModule } from 'primeng/calendar'
 import { DropdownModule } from 'primeng/dropdown'
 import { ImageModule } from 'primeng/image'
-import { CardModule } from 'primeng/card';
+import { CardModule } from 'primeng/card'
+import { TagModule } from 'primeng/tag'
 
 
 @NgModule({
@@ -36,7 +37,8 @@ import { CardModule } from 'primeng/card';
     CalendarModule,
     DropdownModule,
     ImageModule,
-    CardModule
+    CardModule,
+    TagModule
   ],
   providers: [],
   bootstrap: [AppComponent]

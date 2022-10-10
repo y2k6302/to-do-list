@@ -24,8 +24,8 @@ export class TaskService {
     return this.http.put<Task>(`${this.tasksApiUtl}/${id}/complete`, {});
   }
 
-  redo(id: string) {
-    return this.http.put<Task>(`${this.tasksApiUtl}/${id}/redo`, {});
+  reopen(id: string) {
+    return this.http.put<Task>(`${this.tasksApiUtl}/${id}/reopen`, {});
   }
 
   update(task: Task) {

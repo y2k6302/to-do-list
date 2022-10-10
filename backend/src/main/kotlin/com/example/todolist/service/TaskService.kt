@@ -1,6 +1,7 @@
 package com.example.todolist.service
 
 import arrow.core.Either
+import com.example.todolist.model.Completed
 import com.example.todolist.model.CustomResponse
 import com.example.todolist.model.Task
 import com.example.todolist.model.TaskError
@@ -51,7 +52,7 @@ class TaskService {
     fun completeTask(id: String): Either<TaskError, Task> {
         return Either.catch {
             val task = taskRepository.findById(id).get()
-            task.completed = "Y"
+            task.completed = Completed.Y
             taskRepository.save(task)
         }.mapLeft {
             if (it is NoSuchElementException) {
@@ -62,10 +63,10 @@ class TaskService {
         }
     }
 
-    fun redoTask(id: String): Either<TaskError, Task> {
+    fun reopenTask(id: String): Either<TaskError, Task> {
         return Either.catch {
             val task = taskRepository.findById(id).get()
-            task.completed = "N"
+            task.completed = Completed.N
             taskRepository.save(task)
         }.mapLeft {
             if (it is NoSuchElementException) {

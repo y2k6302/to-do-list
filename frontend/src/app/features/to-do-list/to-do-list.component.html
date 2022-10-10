@@ -2,52 +2,75 @@
   <p-tabPanel>
     <ng-template pTemplate="header">
       <i class="pi pi-book"></i>
-      <span>&nbsp;To Do List</span>
+      <span>&nbsp;To Do</span>
     </ng-template>
 
     <div style="padding: 5px">
       <button id="addButton" pButton type="button" label="Add" icon="pi pi-plus" class="p-button-sm"
         (click)="addDialoag()" style="margin: 5px;"></button>
     </div>
-
-    <div style="display: flex; flex-flow: row; flex-wrap: wrap">
+    <div>
       <p-card *ngFor="let task of toDoTasks;"
-        [style]="{width: '360px', margin: '10px', backgroundColor:getBackGroupColer(task.priority, task.completed)}"
+        [style]="{height:'130px', margin: '10px', backgroundColor:getBackGroupColer(task.message, task.priority, task.completed)}"
         styleClass="p-card-shadow">
-        
-        <ng-template pTemplate="title">
-          <p style="word-break: break-all;" [style.textDecoration]="task.completed === 'Y' ? 'line-through' : ''">{{ task.message }}</p>
-        </ng-template>
-        
-        <ng-template pTemplate="content">
-          <p *ngIf="task.reminderTime">{{ task.reminderTime | date : 'yyyy-MM-dd HH:mm'}} 
-            <p-image *ngIf="task.completed === 'N' && isExpired(task.reminderTime)" src="assets/images/notification.png" width="50"></p-image>  
-          </p>          
-        </ng-template>
 
-        <ng-component *ngIf="task.completed === 'Y' then completed else notComplete"></ng-component>
+        <div style="float: left">
+          <p-tag *ngIf="isExpired(task.reminderTime)" [style]="{marginRight: '10px'}" severity="danger">
+            !!!EXPIRED!!!
+          </p-tag>
 
-        <ng-template #notComplete>
-          <ng-template pTemplate="footer">
-            <button pButton type="button" label="Done" icon="pi pi-check" class="p-button-success p-button-sm"
-              (click)="done(task.id)" style="margin: 5px;"></button>
-            <button pButton type="button" label="Edit" icon="pi pi-pencil" class="p-button-warning p-button-sm"
-              (click)="editDialog(task)" style="margin: 5px;"></button>
-            <button pButton type="button" label="Delete" icon="pi pi-trash" class="p-button-danger p-button-sm"
-              (click)="delete(task.id)" style="margin: 5px;"></button>
-          </ng-template>
-        </ng-template>
+          <ng-container [ngSwitch]="task.priority">
+            <p-tag *ngSwitchCase="'HIGH'" [style]="{width: '60px', textAlign: 'center'}" [value]="task.priority"
+              severity="danger"></p-tag>
+            <p-tag *ngSwitchCase="'MEDIUM'" [style]="{width: '60px', textAlign: 'center'}" [value]="task.priority"
+              severity="warning"></p-tag>
+            <p-tag *ngSwitchCase="'LOW'" [style]="{width: '60px', textAlign: 'center'}" [value]="task.priority"
+              severity="success"></p-tag>
+          </ng-container>
 
-        <ng-template #completed>
-          <ng-template pTemplate="footer">
-            <button pButton type="button" label="Redo" icon="pi pi-undo" class="p-button-success p-button-sm"
-              (click)="redo(task.id)" style="margin: 5px;"></button>
-          </ng-template>
-        </ng-template>
+          <p-tag *ngIf="task.reminderTime" [style]="{backgroundColor: 'gray', marginLeft: '10px'}" icon="pi pi-clock">
+            DEADLINE: {{ task.reminderTime | date : 'yyyy-MM-dd HH:mm'}}
+          </p-tag>
+
+          <p style="font: 20px bold;" [style.textDecoration]="task.completed === completedEnum.Y ? 'line-through' : ''">
+            {{ task.message }}</p>
+        </div>
+
+        <div style="float: right">
+          <button pButton type="button" label="Done" icon="pi pi-check" class="p-button-success p-button-sm"
+            (click)="done(task.id)" style="margin: 5px;"></button>
+          <button pButton type="button" label="Edit" icon="pi pi-pencil" class="p-button-warning p-button-sm"
+            (click)="editDialog(task)" style="margin: 5px;"></button>
+          <button pButton type="button" label="Delete" icon="pi pi-trash" class="p-button-danger p-button-sm"
+            (click)="delete(task.id)" style="margin: 5px;"></button>
+        </div>
 
       </p-card>
     </div>
+  </p-tabPanel>
 
+  <p-tabPanel>
+    <ng-template pTemplate="header">
+      <i class="pi pi-book"></i>
+      <span>&nbsp;Done</span>
+    </ng-template>
+
+    <div>
+      <p-card *ngFor="let task of completedTasks;"
+        [style]="{height:'130px', margin: '10px', backgroundColor:getBackGroupColer(task.message, task.priority, task.completed)}"
+        styleClass="p-card-shadow">
+
+        <div style="float: left">
+          <p style="word-break: break-all; text-decoration: line-through;">{{ task.message }}</p>
+        </div>
+
+        <div style="float: right">
+          <button pButton type="button" label="Reopen" icon="pi pi-undo" class="p-button-success p-button-sm"
+            (click)="reopen(task.id)" style="margin: 5px;"></button>
+        </div>
+
+      </p-card>
+    </div>
   </p-tabPanel>
 </p-tabView>
 
@@ -59,7 +82,7 @@
   </div>
   <div style="padding-bottom:10px;">
     <h4 style="width: 10%;float:left;margin: 10px;padding-right:10px;">Priority</h4>
-    <p-dropdown [options]="priorities" [(ngModel)]="inputPriority"></p-dropdown>
+    <p-dropdown [options]="priorities" [(ngModel)]="inputPriority" optionLabel="key" optionValue="value"></p-dropdown>
   </div>
   <div>
     <h4 style="width: 10%;float:left;margin: 10px;padding-right:10px;">Reminder</h4>
@@ -80,7 +103,7 @@
     <h5 style="color:red;padding-left:10px;">{{ serverErrorMessage }}</h5>
   </div>
   <ng-template pTemplate="footer">
-    <button pButton pRipple type="button" label="close" icon="pi pi-save"
-      class="p-button-sm" (click)="hideErrorDialog()"></button>
+    <button pButton pRipple type="button" label="close" icon="pi pi-save" class="p-button-sm"
+      (click)="hideErrorDialog()"></button>
   </ng-template>
 </p-dialog>

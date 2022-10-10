@@ -23,7 +23,6 @@ sealed class TaskError {
             }
 
             is InvalidRequestError -> {
-
                 ResponseEntity.badRequest()
                     .body(Json.encodeToString(CustomResponse("Invalid request: ${taskError.t.message}.")))
             }

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core'
 import { TaskService } from 'src/app/service/task.service'
-import { Task } from 'src/app/types/tasks'
+import { Completed, Priority, Task } from 'src/app/types/tasks'
 
 @Component({
   selector: 'app-to-do-list',
@@ -11,18 +11,19 @@ export class ToDoListComponent implements OnInit {
 
   readonly ADD = "Add"
   readonly EDIT = "Edit"
-  readonly priorities = ['Low', 'Medium', 'High']
-  readonly sortMap = new Map([['High', 2], ['Medium', 1], ['Low', 0]])
+  readonly priorities = Object.entries(Priority).map(([key, value]) => ({ key:key, value:value }))
+  readonly sortMap = new Map([[Priority.HIGH, 2], [Priority.MEDIUM, 1], [Priority.LOW, 0]])
 
   toDoTasks: Task[] = []
+  completedTasks: Task[] = []
   inputMessage: string = ''
-  inputPriority: string = 'Medium'
+  inputPriority: Priority = Priority.MEDIUM
   inputReminderTime: Date | null = null
   action: string = ''
   displayDialog: boolean = false
   displayErrorDialog: boolean = false
   serverErrorMessage: string = ''
-  selectTask: Task = { id: '', message: '', completed: 'N', priority: 'Medium' }
+  selectTask: Task = { id: '', message: '', completed: Completed.N, priority: Priority.MEDIUM }
   validationFailedMessage = ''
 
   constructor(private taskService: TaskService) { }
@@ -34,7 +35,8 @@ export class ToDoListComponent implements OnInit {
   getTasks() {
     this.taskService.getTasks().subscribe({
       next: (tasks) => {
-        this.toDoTasks = tasks
+        this.toDoTasks = tasks.filter(it => it.completed === Completed.N)
+        this.completedTasks = tasks.filter(it => it.completed === Completed.Y)
         this.sortTasks()
       },
       error: (error) => {
@@ -46,20 +48,19 @@ export class ToDoListComponent implements OnInit {
 
   sortTasks() {
     this.toDoTasks.sort((x, y) => {
-
-      //sort by completed
-      if (x.completed === 'Y') {
-        return 1
-      } else if (y.completed === 'Y') {
-        return -1
-      }
-
       //sort by priority
       const xPriority: any = this.sortMap.get(x.priority)
       const yPriority: any = this.sortMap.get(y.priority)      
       if (xPriority > yPriority) {
         return -1
       } else if (xPriority < yPriority) {
+        return 1
+      }
+
+      //sort by expired
+      if(this.isExpired(x.reminderTime)) {
+        return -1
+      } else if (this.isExpired(y.reminderTime)) {
         return 1
       }
 
@@ -88,7 +89,7 @@ export class ToDoListComponent implements OnInit {
 
   addDialoag() {
     this.inputMessage = ''
-    this.inputPriority = 'Medium'
+    this.inputPriority = Priority.MEDIUM
     this.inputReminderTime = null
     this.validationFailedMessage = ''
     this.action = this.ADD
@@ -149,7 +150,7 @@ export class ToDoListComponent implements OnInit {
       return false
     }
 
-    if (this.inputPriority === 'High' && (this.inputReminderTime === null || this.inputReminderTime.getTime() < Date.now())) {
+    if (this.inputPriority === Priority.HIGH && (this.inputReminderTime === null || this.inputReminderTime.getTime() < Date.now())) {
       this.validationFailedMessage = 'High priority task need available reminder time.'
       return false
     }
@@ -181,8 +182,8 @@ export class ToDoListComponent implements OnInit {
     })
   }
 
-  redo(id: string) {
-    this.taskService.redo(id).subscribe({
+  reopen(id: string) {
+    this.taskService.reopen(id).subscribe({
       next: (task) => {
         this.getTasks()
       },
@@ -225,18 +226,23 @@ export class ToDoListComponent implements OnInit {
     this.serverErrorMessage = ''
   }
 
-  getBackGroupColer(proiory: string, completed: string): string {
-    if (completed === 'Y') {
+  getBackGroupColer(message: string, proiory: string, completed: string): string {
+    if (completed === Completed.Y) {
       return 'gray'
     } else {
-      if (proiory === "High") {
+      let key = Priority[proiory as keyof typeof Priority]
+      if (key === Priority.HIGH) {
         return '#f2b9b96b'
-      } else if (proiory === "Medium") {
+      } else if (key === Priority.MEDIUM) {
         return 'rgba(186, 169, 14, 0.25)'
       } else {
         return 'rgba(75, 205, 49, 0.35)'
       }
     }
+  }
+
+  get completedEnum(): typeof Completed {
+    return Completed; 
   }
 
 }

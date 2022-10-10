@@ -233,10 +233,10 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
                   message: Internal server error. 
-  /v1/tasks/{id}/redo:
+  /v1/tasks/{id}/reopen:
     put:
-      summary: Redo a task.
-      description: Redo a task.
+      summary: Reopen a task.
+      description: Reopen a task.
       tags:
         - PUT
       parameters:
@@ -247,14 +247,14 @@ paths:
             type: string
       responses:
         '200':
-          description: Redo task success.
+          description: Reopen task success.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Task"
               example:
                 - id: 3
-                  message: redo message
+                  message: reopen message
                   completed: N
                   priority: High
                   reminderTime: 2022-09-26T13:41:47.000Z
