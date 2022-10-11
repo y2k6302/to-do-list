@@ -194,6 +194,22 @@ export class ToDoListComponent implements OnInit {
     })
   }
 
+  postponed(task: Task) {
+    let now = new Date();
+    now.setMinutes(now.getMinutes() + 30);
+    task.reminderTime = now.toISOString()
+
+    this.taskService.update(task).subscribe({
+      next: (task) => {
+        this.getTasks()
+      },
+      error: (error) => {
+        this.serverErrorMessage = error.message
+        this.showErrorDialog()
+      }
+    })
+  }
+
   stringToDate(dateAsString: string | undefined) {
     if (dateAsString) {
       return new Date(dateAsString)

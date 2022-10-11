@@ -17,6 +17,7 @@ import { DropdownModule } from 'primeng/dropdown'
 import { ImageModule } from 'primeng/image'
 import { CardModule } from 'primeng/card'
 import { TagModule } from 'primeng/tag'
+import { TooltipModule } from 'primeng/tooltip'
 
 
 @NgModule({
@@ -38,7 +39,8 @@ import { TagModule } from 'primeng/tag'
     DropdownModule,
     ImageModule,
     CardModule,
-    TagModule
+    TagModule,
+    TooltipModule    
   ],
   providers: [],
   bootstrap: [AppComponent]

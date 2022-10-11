@@ -13,10 +13,13 @@
       <p-card *ngFor="let task of toDoTasks;"
         [style]="{height:'130px', margin: '10px', backgroundColor:getBackGroupColer(task.priority, task.completed)}"
         styleClass="p-card-shadow">
+        <button *ngIf="isExpired(task.reminderTime)" (click)="postponed(task)" pButton type="button" icon="pi pi-bell"
+          pTooltip="Postponed 30 minutes" class="p-button-rounded p-button-warning"
+          style="margin-right: 10px; float: left"></button>
 
         <div style="float: left">
           <p-tag *ngIf="isExpired(task.reminderTime)" [style]="{marginRight: '10px'}" severity="danger">
-            !!!EXPIRED!!!
+            !!!TIME IS UP!!!
           </p-tag>
 
           <ng-container [ngSwitch]="task.priority">
@@ -29,7 +32,7 @@
           </ng-container>
 
           <p-tag *ngIf="task.reminderTime" [style]="{backgroundColor: 'gray', marginLeft: '10px'}" icon="pi pi-clock">
-            DEADLINE: {{ task.reminderTime | date : 'yyyy-MM-dd HH:mm'}}
+            REMINDER: {{ task.reminderTime | date : 'yyyy-MM-dd HH:mm'}}
           </p-tag>
 
           <p style="font: 20px bold;" [style.textDecoration]="task.completed === completedEnum.Y ? 'line-through' : ''">
