@@ -25,7 +25,7 @@ class TaskControllerTest : CommonTest() {
 
     @BeforeEach
     fun test() {
-        task = Task("", "", Completed.N, Priority.MEDIUM, "")
+        task = Task()
     }
 
     @Test

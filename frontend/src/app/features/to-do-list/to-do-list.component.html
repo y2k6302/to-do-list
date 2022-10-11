@@ -57,7 +57,7 @@
 
     <div>
       <p-card *ngFor="let task of completedTasks;"
-        [style]="{height:'130px', margin: '10px', backgroundColor:getBackGroupColer(task.message, task.priority, task.completed)}"
+        [style]="{height:'130px', margin: '10px', backgroundColor:getBackGroupColer(task.priority, task.completed)}"
         styleClass="p-card-shadow">
 
         <div style="float: left">
