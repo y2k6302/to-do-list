@@ -7,8 +7,8 @@ import org.springframework.http.ResponseEntity
 sealed class TaskError {
     data class NoSuchElementError(val t: Throwable) : TaskError()
     data class DatabaseError(val t: Throwable) : TaskError()
-
     data class InvalidRequestError(val t: Throwable) : TaskError()
+    data class JsonSerializationError(val t: Throwable) : TaskError()
 
     companion object {
         fun toResponse(taskError: TaskError): ResponseEntity<String> = when (taskError) {
@@ -25,6 +25,11 @@ sealed class TaskError {
             is InvalidRequestError -> {
                 ResponseEntity.badRequest()
                     .body(Json.encodeToString(CustomResponse("Invalid request: ${taskError.t.message}.")))
+            }
+
+            is JsonSerializationError -> {
+                ResponseEntity.badRequest()
+                    .body(Json.encodeToString(CustomResponse("Internal json serialization error: ${taskError.t.message}.")))
             }
         }
     }

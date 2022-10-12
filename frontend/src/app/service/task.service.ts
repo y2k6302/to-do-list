@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Task } from 'src/app/types/tasks';
+import { Task, TaskRequestBody } from 'src/app/types/tasks';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -16,7 +16,7 @@ export class TaskService {
     return this.http.get<Task[]>(`${this.tasksApiUtl}`);
   }
 
-  create(task: Task) {
+  create(task: TaskRequestBody) {
     return this.http.post<Task>(`${this.tasksApiUtl}`, task);
   }
 

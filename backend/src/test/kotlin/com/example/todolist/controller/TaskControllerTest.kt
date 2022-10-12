@@ -157,6 +157,19 @@ class TaskControllerTest : CommonTest() {
     }
 
     @Test
+    fun testCreateTaskWhenJsonSerializationError() {
+        Given {
+            body("{ message }")
+            contentType(ContentType.JSON)
+        } When {
+            post("http://localhost:$port/v1/tasks")
+        } Then {
+            statusCode(HttpStatus.BAD_REQUEST.value())
+            body("message", containsString("Internal json serialization error"))
+        }
+    }
+
+    @Test
     fun testUpdateTask() {
         var id = ""
         Given {

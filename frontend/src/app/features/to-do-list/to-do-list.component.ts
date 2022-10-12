@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core'
 import { TaskService } from 'src/app/service/task.service'
-import { Completed, Priority, Task } from 'src/app/types/tasks'
+import { Completed, Priority, Task, TaskRequestBody } from 'src/app/types/tasks'
 
 @Component({
   selector: 'app-to-do-list',
@@ -24,6 +24,7 @@ export class ToDoListComponent implements OnInit {
   displayErrorDialog: boolean = false
   serverErrorMessage: string = ''
   selectTask: Task = { id: '', message: '', completed: Completed.N, priority: Priority.MEDIUM }
+  taskRequestBody: TaskRequestBody = { message: '', completed: Completed.N, priority: Priority.MEDIUM }
   validationFailedMessage = ''
 
   constructor(private taskService: TaskService) { }
@@ -98,11 +99,11 @@ export class ToDoListComponent implements OnInit {
 
   add() {
     if (this.validation()) {
-      this.selectTask.message = this.inputMessage
-      this.selectTask.priority = this.inputPriority
-      this.selectTask.reminderTime = this.inputReminderTime?.toISOString()
+      this.taskRequestBody.message = this.inputMessage
+      this.taskRequestBody.priority = this.inputPriority
+      this.taskRequestBody.reminderTime = this.inputReminderTime?.toISOString()
 
-      this.taskService.create(this.selectTask).subscribe({
+      this.taskService.create(this.taskRequestBody).subscribe({
         next: (task) => {
           this.getTasks()
           this.hideDialog()

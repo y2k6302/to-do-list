@@ -6,6 +6,13 @@ export interface Task {
   reminderTime?: string
 }
 
+export interface TaskRequestBody {
+  message: string,
+  completed: Completed,
+  priority: Priority,
+  reminderTime?: string
+}
+
 export enum Priority {
   HIGH = "HIGH", MEDIUM = "MEDIUM", LOW = "LOW"
 }

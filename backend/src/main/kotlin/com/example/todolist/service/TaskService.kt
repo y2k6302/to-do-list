@@ -8,16 +8,12 @@ import com.example.todolist.model.TaskError
 import com.example.todolist.repository.TaskRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import kotlin.NoSuchElementException
 
 @Service
 class TaskService {
 
     @Autowired
     private lateinit var taskRepository: TaskRepository
-
-    @Autowired
-    private lateinit var sequenceGeneratorService: SequenceGeneratorService
 
     fun getTasks(): Either<TaskError.DatabaseError, List<Task>> {
         return Either.catch {
@@ -41,8 +37,6 @@ class TaskService {
 
     fun createTask(task: Task): Either<TaskError.DatabaseError, Task> {
         return Either.catch {
-            val seq = sequenceGeneratorService.generateSequence("task_seq")
-            task.id = seq.toString()
             taskRepository.save(task)
         }.mapLeft {
             TaskError.DatabaseError(it)
