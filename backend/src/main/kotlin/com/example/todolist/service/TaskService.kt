@@ -1,10 +1,7 @@
 package com.example.todolist.service
 
 import arrow.core.Either
-import com.example.todolist.model.Completed
-import com.example.todolist.model.CustomResponse
-import com.example.todolist.model.Task
-import com.example.todolist.model.TaskError
+import com.example.todolist.model.*
 import com.example.todolist.repository.TaskRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -35,9 +32,15 @@ class TaskService {
         }
     }
 
-    fun createTask(task: Task): Either<TaskError.DatabaseError, Task> {
+    fun createTask(task: TaskRequestBody): Either<TaskError.DatabaseError, Task> {
         return Either.catch {
-            taskRepository.save(task)
+            val newTask = Task(
+                message = task.message,
+                priority = task.priority,
+                completed = task.completed,
+                reminderTime = task.reminderTime
+            )
+            taskRepository.save(newTask)
         }.mapLeft {
             TaskError.DatabaseError(it)
         }
@@ -46,8 +49,14 @@ class TaskService {
     fun completeTask(id: String): Either<TaskError, Task> {
         return Either.catch {
             val task = taskRepository.findById(id).get()
-            task.completed = Completed.Y
-            taskRepository.save(task)
+            val newTask = Task(
+                id = task.id,
+                message = task.message,
+                priority = task.priority,
+                completed = Completed.Y,
+                reminderTime = task.reminderTime
+            )
+            taskRepository.save(newTask)
         }.mapLeft {
             if (it is NoSuchElementException) {
                 TaskError.NoSuchElementError(it)
@@ -60,8 +69,14 @@ class TaskService {
     fun reopenTask(id: String): Either<TaskError, Task> {
         return Either.catch {
             val task = taskRepository.findById(id).get()
-            task.completed = Completed.N
-            taskRepository.save(task)
+            val newTask = Task(
+                id = task.id,
+                message = task.message,
+                completed = Completed.N,
+                priority = task.priority,
+                reminderTime = task.reminderTime
+            )
+            taskRepository.save(newTask)
         }.mapLeft {
             if (it is NoSuchElementException) {
                 TaskError.NoSuchElementError(it)
@@ -71,12 +86,16 @@ class TaskService {
         }
     }
 
-    fun updateTask(id: String, task: Task): Either<TaskError, Task> {
+    fun updateTask(id: String, reqTask: TaskRequestBody): Either<TaskError, Task> {
         return Either.catch {
-            val updateTask = taskRepository.findById(id).get()
-            updateTask.message = task.message
-            updateTask.priority = task.priority
-            updateTask.reminderTime = task.reminderTime
+            val originalTask = taskRepository.findById(id).get()
+            val updateTask = Task(
+                id = originalTask.id,
+                message = reqTask.message,
+                priority = reqTask.priority,
+                completed = reqTask.completed,
+                reminderTime = reqTask.reminderTime
+            )
             taskRepository.save(updateTask)
         }.mapLeft {
             if (it is NoSuchElementException) {

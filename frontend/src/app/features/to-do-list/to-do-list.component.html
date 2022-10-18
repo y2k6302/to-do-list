@@ -95,7 +95,7 @@
     <a style="color:red;padding-left:10px;">{{ validationFailedMessage }}</a>
   </div>
   <ng-template pTemplate="footer">
-    <button id="saveButton" pButton type="button" label="Save" icon="pi pi-save" [disabled]="inputMessage.trim() === ''"
+    <button id="saveButton" pButton type="button" label="Save" icon="pi pi-save" [disabled]="inputMessage.trim() === '' || inputReminderTime === null "
       class="p-button-sm" (click)="action === ADD ? add() : edit()"></button>
   </ng-template>
 </p-dialog>

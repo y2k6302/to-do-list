@@ -1,8 +1,8 @@
 package com.example.todolist.controller
 
 import arrow.core.flatMap
-import com.example.todolist.model.Task
 import com.example.todolist.model.TaskError
+import com.example.todolist.model.TaskRequestBody
 import com.example.todolist.service.TaskService
 import com.example.todolist.service.util.CustomJson
 import com.example.todolist.service.util.Validation
@@ -77,7 +77,7 @@ class TaskController {
 
     @PostMapping("/v1/tasks", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun createTask(@RequestBody taskJson: String): ResponseEntity<String> {
-        return CustomJson.decodeFromString<Task>(taskJson).flatMap {
+        return CustomJson.decodeFromString<TaskRequestBody>(taskJson).flatMap {
             Validation.checkTaskReqBody(it).flatMap {
                 taskService.createTask(it).flatMap {
                     CustomJson.encodeToString(it)
@@ -95,7 +95,7 @@ class TaskController {
 
     @PutMapping("/v1/tasks/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun updateTask(@PathVariable id: String, @RequestBody taskJson: String): ResponseEntity<String> {
-        return CustomJson.decodeFromString<Task>(taskJson).flatMap {
+        return CustomJson.decodeFromString<TaskRequestBody>(taskJson).flatMap {
             Validation.checkTaskReqBody(it).flatMap { task ->
                 taskService.updateTask(id, task).flatMap {
                     CustomJson.encodeToString(it)

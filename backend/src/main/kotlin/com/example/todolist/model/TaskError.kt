@@ -31,6 +31,7 @@ sealed class TaskError {
                 ResponseEntity.badRequest()
                     .body(Json.encodeToString(CustomResponse("Internal json serialization error: ${taskError.t.message}.")))
             }
+
         }
     }
 }

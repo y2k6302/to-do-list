@@ -28,8 +28,8 @@ export class TaskService {
     return this.http.put<Task>(`${this.tasksApiUtl}/${id}/reopen`, {});
   }
 
-  update(task: Task) {
-    return this.http.put<Task>(`${this.tasksApiUtl}/${task.id}`, task);
+  update(id: string, task: TaskRequestBody) {
+    return this.http.put<Task>(`${this.tasksApiUtl}/${id}`, task);
   }
 
   delete(id: string) {

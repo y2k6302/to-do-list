@@ -6,3 +6,4 @@ spring:
       database: task
       repositories:
         type: auto
+

@@ -128,11 +128,11 @@ export class ToDoListComponent implements OnInit {
 
   edit() {
     if (this.validation()) {
-      this.selectTask.message = this.inputMessage
-      this.selectTask.priority = this.inputPriority
-      this.selectTask.reminderTime = this.inputReminderTime?.toISOString()
+      this.taskRequestBody.message = this.inputMessage
+      this.taskRequestBody.priority = this.inputPriority
+      this.taskRequestBody.reminderTime = this.inputReminderTime?.toISOString()
 
-      this.taskService.update(this.selectTask).subscribe({
+      this.taskService.update(this.selectTask.id, this.taskRequestBody).subscribe({
         next: (task) => {
           this.getTasks()
           this.hideDialog()
@@ -200,7 +200,11 @@ export class ToDoListComponent implements OnInit {
     now.setMinutes(now.getMinutes() + 30);
     task.reminderTime = now.toISOString()
 
-    this.taskService.update(task).subscribe({
+    this.taskRequestBody.message = task.message
+    this.taskRequestBody.priority = task.priority
+    this.taskRequestBody.reminderTime = task.reminderTime
+
+    this.taskService.update(task.id, this.taskRequestBody).subscribe({
       next: (task) => {
         this.getTasks()
       },

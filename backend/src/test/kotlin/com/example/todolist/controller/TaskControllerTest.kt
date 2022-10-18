@@ -4,6 +4,7 @@ import com.example.todolist.CommonTest
 import com.example.todolist.model.Completed
 import com.example.todolist.model.Priority
 import com.example.todolist.model.Task
+import com.example.todolist.model.TaskRequestBody
 import com.example.todolist.service.TaskService
 import io.restassured.http.ContentType
 import io.restassured.module.kotlin.extensions.Given
@@ -15,24 +16,30 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import java.text.SimpleDateFormat
+import java.util.*
 
 class TaskControllerTest : CommonTest() {
 
     @Autowired
     private lateinit var taskService: TaskService
 
-    private lateinit var task: Task
+    private lateinit var reqTask: FrontendTaskRequestBody
+
+    private val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+
+    private val defaultDate = dateFormat.format(Date())
 
     @BeforeEach
     fun test() {
-        task = Task()
+        reqTask = FrontendTaskRequestBody("", Completed.N, Priority.MEDIUM, defaultDate)
     }
 
     @Test
     fun testGetTasks() {
         Given {
-            task.message = "testGetTasks"
-            createTask(task)
+            reqTask = FrontendTaskRequestBody("testGetTasks", Completed.N, Priority.MEDIUM, defaultDate)
+            createTask(reqTask)
             contentType(ContentType.JSON)
         } When {
             get("http://localhost:$port/v1/tasks")
@@ -47,8 +54,8 @@ class TaskControllerTest : CommonTest() {
     fun testGetTaskById() {
         var id = ""
         Given {
-            task.message = "testGetTaskById"
-            id = createTask(task).id
+            reqTask = FrontendTaskRequestBody("testGetTaskById", Completed.N, Priority.MEDIUM, defaultDate)
+            id = createTask(reqTask).id
             contentType(ContentType.JSON)
         } When {
             get("http://localhost:$port/v1/tasks/${id}")
@@ -74,9 +81,8 @@ class TaskControllerTest : CommonTest() {
     fun testCompleteTask() {
         var id = ""
         Given {
-            task.message = "testCompleteTask"
-            task.completed = Completed.N
-            id = createTask(task).id
+            reqTask = FrontendTaskRequestBody("testCompleteTask", Completed.N, Priority.MEDIUM, defaultDate)
+            id = createTask(reqTask).id
             contentType(ContentType.JSON)
         } When {
             put("http://localhost:$port/v1/tasks/${id}/complete")
@@ -102,9 +108,8 @@ class TaskControllerTest : CommonTest() {
     fun testReopen() {
         var id = ""
         Given {
-            task.message = "testReopen"
-            task.completed = Completed.Y
-            id = createTask(task).id
+            reqTask = FrontendTaskRequestBody("testReopen", Completed.Y, Priority.MEDIUM, defaultDate)
+            id = createTask(reqTask).id
             contentType(ContentType.JSON)
         } When {
             put("http://localhost:$port/v1/tasks/${id}/reopen")
@@ -129,10 +134,8 @@ class TaskControllerTest : CommonTest() {
     @Test
     fun testCreateTask() {
         Given {
-            task.message = "testCreateTask"
-            task.completed = Completed.N
-            task.priority = Priority.MEDIUM
-            body(task)
+            reqTask = FrontendTaskRequestBody("testCreateTask", Completed.Y, Priority.MEDIUM, defaultDate)
+            body(reqTask)
             contentType(ContentType.JSON)
         } When {
             post("http://localhost:$port/v1/tasks")
@@ -145,8 +148,8 @@ class TaskControllerTest : CommonTest() {
     @Test
     fun testCreateTaskWhenReqBodyInvalid() {
         Given {
-            task.message = ""
-            body(task)
+            reqTask = FrontendTaskRequestBody("", Completed.Y, Priority.MEDIUM, defaultDate)
+            body(reqTask)
             contentType(ContentType.JSON)
         } When {
             post("http://localhost:$port/v1/tasks")
@@ -173,15 +176,13 @@ class TaskControllerTest : CommonTest() {
     fun testUpdateTask() {
         var id = ""
         Given {
-            task.message = "testUpdateTask-before"
-            val updateTask = createTask(task)
+            reqTask = FrontendTaskRequestBody("testUpdateTask-before", Completed.Y, Priority.MEDIUM, defaultDate)
+            val updateTask = createTask(reqTask)
             id = updateTask.id
 
-            updateTask.message = "testUpdateTask-update"
-            updateTask.completed = Completed.N
-            updateTask.priority = Priority.HIGH
+            reqTask = FrontendTaskRequestBody("testUpdateTask-update", Completed.N, Priority.HIGH, defaultDate)
 
-            body(updateTask)
+            body(reqTask)
             contentType(ContentType.JSON)
         } When {
             put("http://localhost:$port/v1/tasks/${id}")
@@ -195,12 +196,8 @@ class TaskControllerTest : CommonTest() {
     @Test
     fun testUpdateTaskＷhenIdNotExist() {
         Given {
-            task.id = "-1"
-            task.message = "testCreateTask"
-            task.priority = Priority.LOW
-            task.completed = Completed.N
-
-            body(task)
+            reqTask = FrontendTaskRequestBody("testCreateTask", Completed.N, Priority.LOW, defaultDate)
+            body(reqTask)
             contentType(ContentType.JSON)
         } When {
             put("http://localhost:$port/v1/tasks/-1")
@@ -213,7 +210,7 @@ class TaskControllerTest : CommonTest() {
     @Test
     fun testUpdateTaskＷhenReqBodyInvalid() {
         Given {
-            body(task)
+            body(reqTask)
             contentType(ContentType.JSON)
         } When {
             put("http://localhost:$port/v1/tasks/-1")
@@ -227,8 +224,8 @@ class TaskControllerTest : CommonTest() {
     fun testDeleteTask() {
         var id = ""
         Given {
-            task.message = "testDeleteTask"
-            id = createTask(task).id
+            reqTask = FrontendTaskRequestBody("testDeleteTask", Completed.N, Priority.MEDIUM, defaultDate)
+            id = createTask(reqTask).id
             contentType(ContentType.JSON)
         } When {
             delete("http://localhost:$port/v1/tasks/${id}")
@@ -251,10 +248,23 @@ class TaskControllerTest : CommonTest() {
         }
     }
 
-    private fun createTask(task: Task): Task {
-        taskService.createTask(task).fold(
+    private fun createTask(task: FrontendTaskRequestBody): Task {
+        val newTask = TaskRequestBody(
+            message = task.message,
+            completed = task.completed,
+            priority = task.priority,
+            reminderTime = dateFormat.parse(task.reminderTime)
+        )
+        taskService.createTask(newTask).fold(
             ifLeft = { Assertions.fail("create task fail.") },
             ifRight = { return it }
         )
     }
+
+    private data class FrontendTaskRequestBody(
+        val message: String,
+        val completed: Completed,
+        val priority: Priority,
+        val reminderTime: String
+    )
 }
