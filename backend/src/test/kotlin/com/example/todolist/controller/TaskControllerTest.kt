@@ -24,7 +24,7 @@ class TaskControllerTest : CommonTest() {
     @Autowired
     private lateinit var taskService: TaskService
 
-    private lateinit var reqTask: FrontendTaskRequestBody
+    private lateinit var reqTask: TaskRequestBody
 
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
 
@@ -32,13 +32,13 @@ class TaskControllerTest : CommonTest() {
 
     @BeforeEach
     fun test() {
-        reqTask = FrontendTaskRequestBody("", Completed.N, Priority.MEDIUM, defaultDate)
+        reqTask = TaskRequestBody("", Completed.N, Priority.MEDIUM, defaultDate)
     }
 
     @Test
     fun testGetTasks() {
         Given {
-            reqTask = FrontendTaskRequestBody("testGetTasks", Completed.N, Priority.MEDIUM, defaultDate)
+            reqTask = TaskRequestBody("testGetTasks", Completed.N, Priority.MEDIUM, defaultDate)
             createTask(reqTask)
             contentType(ContentType.JSON)
         } When {
@@ -54,7 +54,7 @@ class TaskControllerTest : CommonTest() {
     fun testGetTaskById() {
         var id = ""
         Given {
-            reqTask = FrontendTaskRequestBody("testGetTaskById", Completed.N, Priority.MEDIUM, defaultDate)
+            reqTask = TaskRequestBody("testGetTaskById", Completed.N, Priority.MEDIUM, defaultDate)
             id = createTask(reqTask).id
             contentType(ContentType.JSON)
         } When {
@@ -81,7 +81,7 @@ class TaskControllerTest : CommonTest() {
     fun testCompleteTask() {
         var id = ""
         Given {
-            reqTask = FrontendTaskRequestBody("testCompleteTask", Completed.N, Priority.MEDIUM, defaultDate)
+            reqTask = TaskRequestBody("testCompleteTask", Completed.N, Priority.MEDIUM, defaultDate)
             id = createTask(reqTask).id
             contentType(ContentType.JSON)
         } When {
@@ -108,7 +108,7 @@ class TaskControllerTest : CommonTest() {
     fun testReopen() {
         var id = ""
         Given {
-            reqTask = FrontendTaskRequestBody("testReopen", Completed.Y, Priority.MEDIUM, defaultDate)
+            reqTask = TaskRequestBody("testReopen", Completed.Y, Priority.MEDIUM, defaultDate)
             id = createTask(reqTask).id
             contentType(ContentType.JSON)
         } When {
@@ -134,7 +134,7 @@ class TaskControllerTest : CommonTest() {
     @Test
     fun testCreateTask() {
         Given {
-            reqTask = FrontendTaskRequestBody("testCreateTask", Completed.Y, Priority.MEDIUM, defaultDate)
+            reqTask = TaskRequestBody("testCreateTask", Completed.Y, Priority.MEDIUM, defaultDate)
             body(reqTask)
             contentType(ContentType.JSON)
         } When {
@@ -148,7 +148,7 @@ class TaskControllerTest : CommonTest() {
     @Test
     fun testCreateTaskWhenReqBodyInvalid() {
         Given {
-            reqTask = FrontendTaskRequestBody("", Completed.Y, Priority.MEDIUM, defaultDate)
+            reqTask = TaskRequestBody("", Completed.Y, Priority.MEDIUM, defaultDate)
             body(reqTask)
             contentType(ContentType.JSON)
         } When {
@@ -176,11 +176,11 @@ class TaskControllerTest : CommonTest() {
     fun testUpdateTask() {
         var id = ""
         Given {
-            reqTask = FrontendTaskRequestBody("testUpdateTask-before", Completed.Y, Priority.MEDIUM, defaultDate)
+            reqTask = TaskRequestBody("testUpdateTask-before", Completed.Y, Priority.MEDIUM, defaultDate)
             val updateTask = createTask(reqTask)
             id = updateTask.id
 
-            reqTask = FrontendTaskRequestBody("testUpdateTask-update", Completed.N, Priority.HIGH, defaultDate)
+            reqTask = TaskRequestBody("testUpdateTask-update", Completed.N, Priority.HIGH, defaultDate)
 
             body(reqTask)
             contentType(ContentType.JSON)
@@ -196,7 +196,7 @@ class TaskControllerTest : CommonTest() {
     @Test
     fun testUpdateTaskＷhenIdNotExist() {
         Given {
-            reqTask = FrontendTaskRequestBody("testCreateTask", Completed.N, Priority.LOW, defaultDate)
+            reqTask = TaskRequestBody("testCreateTask", Completed.N, Priority.LOW, defaultDate)
             body(reqTask)
             contentType(ContentType.JSON)
         } When {
@@ -224,7 +224,7 @@ class TaskControllerTest : CommonTest() {
     fun testDeleteTask() {
         var id = ""
         Given {
-            reqTask = FrontendTaskRequestBody("testDeleteTask", Completed.N, Priority.MEDIUM, defaultDate)
+            reqTask = TaskRequestBody("testDeleteTask", Completed.N, Priority.MEDIUM, defaultDate)
             id = createTask(reqTask).id
             contentType(ContentType.JSON)
         } When {
@@ -248,23 +248,11 @@ class TaskControllerTest : CommonTest() {
         }
     }
 
-    private fun createTask(task: FrontendTaskRequestBody): Task {
-        val newTask = TaskRequestBody(
-            message = task.message,
-            completed = task.completed,
-            priority = task.priority,
-            reminderTime = dateFormat.parse(task.reminderTime)
-        )
-        taskService.createTask(newTask).fold(
+    private fun createTask(task: TaskRequestBody): Task {
+        taskService.createTask(task).fold(
             ifLeft = { Assertions.fail("create task fail.") },
             ifRight = { return it }
         )
     }
 
-    private data class FrontendTaskRequestBody(
-        val message: String,
-        val completed: Completed,
-        val priority: Priority,
-        val reminderTime: String
-    )
 }

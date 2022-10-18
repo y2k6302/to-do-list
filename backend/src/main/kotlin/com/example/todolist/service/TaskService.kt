@@ -5,12 +5,15 @@ import com.example.todolist.model.*
 import com.example.todolist.repository.TaskRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.text.SimpleDateFormat
 
 @Service
 class TaskService {
 
     @Autowired
     private lateinit var taskRepository: TaskRepository
+
+    private val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
 
     fun getTasks(): Either<TaskError.DatabaseError, List<Task>> {
         return Either.catch {
@@ -38,7 +41,7 @@ class TaskService {
                 message = task.message,
                 priority = task.priority,
                 completed = task.completed,
-                reminderTime = task.reminderTime
+                reminderTime = formatter.parse(task.reminderTime)
             )
             taskRepository.save(newTask)
         }.mapLeft {
@@ -94,7 +97,7 @@ class TaskService {
                 message = reqTask.message,
                 priority = reqTask.priority,
                 completed = reqTask.completed,
-                reminderTime = reqTask.reminderTime
+                reminderTime = formatter.parse(reqTask.reminderTime)
             )
             taskRepository.save(updateTask)
         }.mapLeft {

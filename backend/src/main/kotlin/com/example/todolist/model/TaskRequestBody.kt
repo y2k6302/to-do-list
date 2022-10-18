@@ -9,7 +9,5 @@ data class TaskRequestBody(
     val message: String,
     val completed: Completed,
     val priority: Priority,
-
-    @Serializable(with = DateSerializer::class)
-    val reminderTime: Date
+    val reminderTime: String
 )
